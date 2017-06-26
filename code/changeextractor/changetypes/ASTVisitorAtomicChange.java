@@ -27,6 +27,7 @@
 package changetypes;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,14 +66,23 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import lsclipse.utils.StringCleaner;
+
 public class ASTVisitorAtomicChange extends ASTVisitor {
 
+	public static String PARAM_SEPARATOR = "_";
+	
 	// Parse results
 	public FactBase facts;
 	private Map<String, IJavaElement> typeToFileMap_ = new HashMap<String, IJavaElement>();
+	private Map<String, CodeSegment> entityLineMap_ = new HashMap<String, CodeSegment>();
 
 	public Map<String, IJavaElement> getTypeToFileMap() {
 		return Collections.unmodifiableMap(typeToFileMap_);
+	}
+	
+	public Map<String, CodeSegment> getEntityLineMap() {
+		return Collections.unmodifiableMap(entityLineMap_);
 	}
 
 	private List<String> allowedFieldMods_ = Arrays.asList(new String[] {
@@ -92,7 +102,9 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 
 	public boolean visit(PackageDeclaration node) {
 		try {
-			facts.add(Fact.makePackageFact(node.getName().toString()));
+			String name = node.getName().toString();
+			facts.add(Fact.makePackageFact(name));
+			entityLineMap_.put(getEntityMapKey(name), CodeSegment.extract(node));
 		} catch (Exception e) {
 			System.err.println("Cannot resolve bindings for package "
 					+ node.getName().toString());
@@ -164,6 +176,12 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 			System.out.println("elseStmt: " + elseStr);
 			System.err.println(e.getMessage());
 		}
+		try {
+			entityLineMap_.put(getEntityMapKey(condStr, thenStr, elseStr, methodStr), CodeSegment.extract(node));
+		} catch (Exception e) {
+			System.err.println("Map code line fail for conditional " + node.toString());
+			System.err.println(e.getMessage());
+		}
 		return true;
 	}
 
@@ -189,6 +207,12 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		exprStr = edit_str(exprStr);
 
 		facts.add(Fact.makeCastFact(exprStr, typeStr, methodStr));
+		try {
+			entityLineMap_.put(getEntityMapKey(exprStr, typeStr, methodStr), CodeSegment.extract(node));
+		} catch (Exception e) {
+			System.err.println("Map code line failed for cast \"" + exprStr + "\"");
+			System.err.println(e.getMessage());
+		}
 
 		return true;
 	}
@@ -221,7 +245,15 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		facts.add(Fact.makeTryCatchFact(bodyStr, catchClauses.toString(),
 				finallyStr, methodStr));
 
+		entityLineMap_.put(getEntityMapKey(bodyStr, catchClauses.toString(), finallyStr, methodStr), CodeSegment.extract(node));
 		return true;
+	}
+	
+	private static String getEntityMapKey(CharSequence... elements) {
+		List<CharSequence> es = new ArrayList<CharSequence>();
+		for (CharSequence e : elements)
+			es.add(StringCleaner.cleanupString(e.toString()));
+		return String.join(PARAM_SEPARATOR, es);
 	}
 
 	private static String getQualifiedName(ITypeBinding itb) {
@@ -343,6 +375,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 			System.err.println("Cannot resolve bindings for class "
 					+ node.getName().toString());
 		}
+		
+		entityLineMap_.put(getEntityMapKey(getQualifiedName(itb)), CodeSegment.extract(node));
 
 		// make super type facts
 
@@ -353,6 +387,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 						getQualifiedName(itb)));
 				facts.add(Fact.makeExtendsFact(getQualifiedName(itb2),
 						getQualifiedName(itb)));
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(itb2), getQualifiedName(itb)),
+						CodeSegment.extract(node));
 			}
 			if (node.isInterface()) {
 				for (ITypeBinding i2 : itb.getInterfaces()) {
@@ -360,6 +396,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 							getQualifiedName(itb)));
 					facts.add(Fact.makeExtendsFact(getQualifiedName(i2),
 							getQualifiedName(itb)));
+					entityLineMap_.put(getEntityMapKey(getQualifiedName(i2), getQualifiedName(itb)),
+							CodeSegment.extract(node));
 				}
 			} else {
 				for (ITypeBinding i2 : itb.getInterfaces()) {
@@ -367,6 +405,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 							getQualifiedName(itb)));
 					facts.add(Fact.makeImplementsFact(getQualifiedName(i2),
 							getQualifiedName(itb)));
+					entityLineMap_.put(getEntityMapKey(getQualifiedName(i2), getQualifiedName(itb)),
+							CodeSegment.extract(node));
 				}
 			}
 		} catch (Exception e) {
@@ -379,35 +419,46 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 			for (IVariableBinding ivb : itb.getDeclaredFields()) {
 				String visibility = getModifier(ivb);
 				String fieldStr = ivb.toString();
+				CodeSegment vcs = CodeSegment.extract(node, ivb);
 				// System.out.println("fieldStr: " + fieldStr);
 				String[] tokens = fieldStr.split(" ");
 				for (String token : tokens) {
 					if (allowedFieldMods_.contains(token)) {
 						facts.add(Fact.makeFieldModifierFact(
 								getQualifiedName(ivb), token));
+						entityLineMap_.put(getEntityMapKey(getQualifiedName(ivb), token), vcs);
 					}
 				}
 				facts.add(Fact.makeFieldFact(getQualifiedName(ivb),
 						ivb.getName(), getQualifiedName(itb), visibility));
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(ivb)), vcs);
 				if (!ivb.getType().isParameterizedType()) {
 					facts.add(Fact.makeFieldTypeFact(getQualifiedName(ivb),
 							getQualifiedName(ivb.getType())));
+					entityLineMap_.put(
+							getEntityMapKey(getQualifiedName(ivb), getQualifiedName(ivb.getType())),
+							vcs);
 				} else {
 					facts.add(Fact.makeFieldTypeFact(getQualifiedName(ivb),
 							makeParameterizedName(ivb)));
+					entityLineMap_.put(
+							getEntityMapKey(getQualifiedName(ivb), makeParameterizedName(ivb)),
+							vcs);
 				}
 			}
 		} catch (Exception e) {
 			System.err.println("Cannot resolve field bindings for class "
 					+ node.getName().toString());
+			System.err.println(e.getMessage());
 		}
 
 		// make inner type facts
 		try {
 			for (TypeDeclaration t : node.getTypes()) {
 				ITypeBinding intb = t.resolveBinding();
-				facts.add(Fact.makeTypeInTypeFact(getQualifiedName(intb),
-						getQualifiedName(itb)));
+				facts.add(Fact.makeTypeInTypeFact(getQualifiedName(intb), getQualifiedName(itb)));
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(intb), getQualifiedName(itb)),
+						CodeSegment.extract(node, intb));
 			}
 		} catch (Exception e) {
 			System.err.println("Cannot resolve inner type bindings for class "
@@ -459,6 +510,11 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 			System.err.println("Cannot resolve bindings for anonymous class "
 					+ itb.getName());
 		}
+		try {
+			entityLineMap_.put(getEntityMapKey(getQualifiedName(itb)), CodeSegment.extract(node));
+		} catch (Exception e) {
+			System.err.println("Map code line fail for anonymous class " + itb.getName());
+		}
 
 		// make super type facts
 		try {
@@ -469,6 +525,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 				facts.add(Fact.makeExtendsFact(
 						getQualifiedName(itb.getSuperclass()),
 						getQualifiedName(itb)));
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(itb.getSuperclass()), getQualifiedName(itb)),
+						CodeSegment.extract(node));
 			} catch (NullPointerException e) {
 				return false;
 			}
@@ -478,6 +536,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 							getQualifiedName(itb)));
 					facts.add(Fact.makeImplementsFact(getQualifiedName(i2),
 							getQualifiedName(itb)));
+					entityLineMap_.put(getEntityMapKey(getQualifiedName(i2), getQualifiedName(itb)),
+							CodeSegment.extract(node));
 				} catch (NullPointerException e) {
 					return false;
 				}
@@ -496,6 +556,7 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 						ivb.getName(), getQualifiedName(itb), visibility));
 				facts.add(Fact.makeFieldTypeFact(getQualifiedName(ivb),
 						getQualifiedName(ivb.getType())));
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(ivb)), CodeSegment.extract(node, ivb));
 			}
 		} catch (Exception e) {
 			System.err
@@ -506,8 +567,10 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		// make inner type facts for self
 		try {
 			if (itb.isNested()) {
-				facts.add(Fact.makeTypeInTypeFact(getQualifiedName(itb),
-						getQualifiedName(itb.getDeclaringClass())));
+				facts.add(Fact.makeTypeInTypeFact(getQualifiedName(itb), getQualifiedName(itb.getDeclaringClass())));
+				entityLineMap_.put(
+						getEntityMapKey(getQualifiedName(itb), getQualifiedName(itb.getDeclaringClass())),
+						CodeSegment.extract(node));
 			}
 		} catch (Exception e) {
 			System.err.println("Cannot resolve inner type for anonymous class "
@@ -549,10 +612,14 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 					.println("Cannot resolve return method bindings for method "
 							+ node.getName().toString());
 		}
+		
+		entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb)), CodeSegment.extract(node));
+		
 		// make return type fact
 		try {
 			String returntype = getQualifiedName(mtb.getReturnType());
 			facts.add(Fact.makeReturnsFact(getQualifiedName(mtb), returntype));
+			entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb), returntype), CodeSegment.extract(node, Fact.FactTypes.RETURN));
 		} catch (Exception e) {
 			System.err
 					.println("Cannot resolve return type bindings for method "
@@ -562,6 +629,7 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		try {
 			facts.add(Fact.makeModifierMethodFact(getQualifiedName(mtb),
 					modifier));
+			entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb), modifier), CodeSegment.extract(node, Fact.FactTypes.METHODMODIFIER));
 		} catch (Exception e) {
 			System.err
 					.println("Cannot resolve return type bindings for method modifier "
@@ -580,6 +648,7 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 			// bodystring));
 			facts.add(Fact
 					.makeMethodBodyFact(getQualifiedName(mtb), bodystring));
+			entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb), "<body>"), CodeSegment.extract(node, Fact.FactTypes.METHODBODY));
 		} catch (Exception e) {
 			System.err.println("Cannot resolve bindings for body");
 		}
@@ -598,6 +667,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 			// We don't know if any change occurred in the paramList
 			facts.add(Fact.makeParameterFact(getQualifiedName(mtb),
 					sb.toString(), ""));
+			entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb), sb.toString()), // Parameter Fact doesn't use third param
+					CodeSegment.extract(node, Fact.FactTypes.PARAMETER));
 		} catch (Exception e) {
 			System.err.println("Cannot resolve bindings for parameters");
 		}
@@ -607,6 +678,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 			for (Name n : thrownTypes) {
 				facts.add(Fact.makeThrownExceptionFact(getQualifiedName(mtb),
 						getQualifiedName(n.resolveTypeBinding())));
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb), getQualifiedName(n.resolveTypeBinding())),
+						CodeSegment.extract(node, Fact.FactTypes.THROWN));
 			}
 		} catch (Exception e) {
 			System.err.println("Cannot resolve bindings for exceptions");
@@ -643,15 +716,27 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 			System.err.println("Cannot resolve field access \""
 					+ node.getName().toString() + "\"");
 		}
+		try {
+			entityLineMap_.put(
+					getEntityMapKey(getQualifiedName(node.resolveFieldBinding()), getQualifiedName(mtb)),
+					CodeSegment.extract(node));
+		} catch (Exception e) {
+			System.err.println("Map code line failed for field access " + node.getName().toString());
+			System.err.println(e.getMessage());
+		}
 		// Make getter/setter facts
 		try {
 			String simpleMethodName = getSimpleName(mtb);
 			if (simpleMethodName.toLowerCase().startsWith("get")) {
 				facts.add(Fact.makeGetterFact(getQualifiedName(mtb),
 						getQualifiedName(node.resolveFieldBinding())));
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb), getQualifiedName(node.resolveFieldBinding())),
+						CodeSegment.extract(node));
 			} else if (simpleMethodName.toLowerCase().startsWith("set")) {
 				facts.add(Fact.makeSetterFact(getQualifiedName(mtb),
 						getQualifiedName(node.resolveFieldBinding())));
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb), getQualifiedName(node.resolveFieldBinding())),
+						CodeSegment.extract(node));
 			}
 		} catch (Exception e) {
 			System.err.println("Cannot resolve bindings for exceptions");
@@ -673,7 +758,7 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 			if (node.getIdentifier().equals("length"))
 				return false;
 			try {
-				return visitName(node.resolveBinding(), mtbStack.peek());
+				return visitName(node.resolveBinding(), mtbStack.peek(), node);
 			} catch (Exception e) {
 				System.err.println("Cannot resolve simple name \""
 						+ node.getFullyQualifiedName().toString() + "\"");
@@ -691,7 +776,7 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 				return true;
 			}
 			try {
-				return visitName(node.resolveBinding(), mtbStack.peek());
+				return visitName(node.resolveBinding(), mtbStack.peek(), node);
 			} catch (Exception e) {
 				System.err.println("Cannot resolve qualified name \""
 						+ node.getFullyQualifiedName().toString() + "\"");
@@ -701,7 +786,7 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		return false;
 	}
 
-	private boolean visitName(IBinding ib, IMethodBinding iMethodBinding)
+	private boolean visitName(IBinding ib, IMethodBinding iMethodBinding, Name node)
 			throws Exception {
 		switch (ib.getKind()) {
 		case IBinding.VARIABLE:
@@ -710,16 +795,19 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 				facts.add(Fact.makeAccessesFact(getQualifiedName(ivb),
 						getQualifiedName(iMethodBinding)));
 
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(ivb), getQualifiedName(iMethodBinding)), CodeSegment.extract(node));
 				try {
 					String simpleMethodName = getSimpleName(iMethodBinding);
 					if (simpleMethodName.toLowerCase().startsWith("get")) {
 						facts.add(Fact.makeGetterFact(
 								getQualifiedName(iMethodBinding),
 								getQualifiedName(ivb)));
+						entityLineMap_.put(getEntityMapKey(getQualifiedName(iMethodBinding), getQualifiedName(ivb)), CodeSegment.extract(node));
 					} else if (simpleMethodName.toLowerCase().startsWith("set")) {
 						facts.add(Fact.makeSetterFact(
 								getQualifiedName(iMethodBinding),
 								getQualifiedName(ivb)));
+						entityLineMap_.put(getEntityMapKey(getQualifiedName(iMethodBinding), getQualifiedName(ivb)), CodeSegment.extract(node));
 					}
 				} catch (Exception e) {
 					System.err
@@ -771,9 +859,13 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 				ITypeBinding itb = e.resolveTypeBinding();
 				facts.add(Fact.makeCallsFact(getQualifiedName(mtbStack.peek()),
 						getQualifiedName(itb) + "#" + getSimpleName(mmtb)));
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(mtbStack.peek()), getQualifiedName(itb) + "#" + getSimpleName(mmtb)),
+						CodeSegment.extract(node));
 			} else {
 				facts.add(Fact.makeCallsFact(getQualifiedName(mtbStack.peek()),
 						getQualifiedName(mmtb)));
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(mtbStack.peek()), getQualifiedName(mmtb)),
+						CodeSegment.extract(node));
 			}
 			// */
 			// facts.add(Fact.makeCallsFact(getQualifiedName(mtbStack.peek()),
@@ -795,6 +887,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		try {
 			facts.add(Fact.makeCallsFact(getQualifiedName(mtbStack.peek()),
 					getQualifiedName(mmtb)));
+			entityLineMap_.put(getEntityMapKey(getQualifiedName(mtbStack.peek()), getQualifiedName(mmtb)),
+					CodeSegment.extract(node));
 		} catch (Exception e) {
 			System.err.println("Cannot resolve method invocation \""
 					+ node.getName().toString() + "\"");
@@ -812,6 +906,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		try {
 			facts.add(Fact.makeCallsFact(getQualifiedName(mtbStack.peek()),
 					getQualifiedName(mmtb)));
+			entityLineMap_.put(getEntityMapKey(getQualifiedName(mtbStack.peek()), getQualifiedName(mmtb)),
+					CodeSegment.extract(node));
 		} catch (Exception e) {
 			System.err.println("Cannot resolve class instance creation \""
 					+ node.getType().toString() + "\"");
@@ -829,6 +925,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		try {
 			facts.add(Fact.makeCallsFact(getQualifiedName(mtbStack.peek()),
 					getQualifiedName(mmtb)));
+			entityLineMap_.put(getEntityMapKey(getQualifiedName(mtbStack.peek()), getQualifiedName(mmtb)),
+					CodeSegment.extract(node));
 		} catch (Exception e) {
 			System.err.println("Cannot resolve constructor invocation in \""
 					+ "\"");
@@ -846,6 +944,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		try {
 			facts.add(Fact.makeCallsFact(getQualifiedName(mtbStack.peek()),
 					getQualifiedName(mmtb)));
+			entityLineMap_.put(getEntityMapKey(getQualifiedName(mtbStack.peek()), getQualifiedName(mmtb)),
+					CodeSegment.extract(node));
 		} catch (Exception e) {
 			System.err
 					.println("Cannot resolve super constructor invocation in \""
@@ -862,10 +962,13 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		for (Object ovdf : vds.fragments()) {
 			VariableDeclarationFragment vdf = (VariableDeclarationFragment) ovdf;
 			try {
-				facts.add(Fact.makeLocalVarFact(getQualifiedName(mtbStack
-						.peek()), getQualifiedName(vds.getType()
-						.resolveBinding()), vdf.getName().getIdentifier(), vdf
-						.getInitializer().toString()));
+				String methodName = getQualifiedName(mtbStack.peek()),
+						typeName = getQualifiedName(vds.getType().resolveBinding()),
+						identifier = vdf.getName().getIdentifier(),
+						expression = vdf.getInitializer().toString();
+				facts.add(Fact.makeLocalVarFact(methodName, typeName, identifier, expression));
+				entityLineMap_.put(getEntityMapKey(methodName, typeName, identifier, expression),
+						CodeSegment.extract(vdf));
 			} catch (Exception e) {
 				System.err.println("Cannot resolve variable declaration \""
 						+ vdf.getName().toString() + "\"");

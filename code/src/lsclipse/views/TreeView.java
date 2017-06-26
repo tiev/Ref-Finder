@@ -66,6 +66,8 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
+import changetypes.CodeLineRetriever;
+
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
  * shows data obtained from the model. The sample creates a dummy model on the
@@ -102,6 +104,7 @@ public class TreeView extends ViewPart {
 	ArrayList<EditorInput> listDiffs = new ArrayList<EditorInput>();
 	IProject baseproj = null;
 	IProject newproj = null;
+	CodeLineRetriever lineRetriever;
 
 	/**
 	 * The constructor.
@@ -288,6 +291,7 @@ public class TreeView extends ViewPart {
 
 				int numtabs = 0;
 
+				CodeLineRetriever lineRetriever = new CodeLineRetriever(LSDiffRunner.getOldEntityLineMap(), LSDiffRunner.getNewEntityLineMap());
 				for (String statement : node.getDependents()) {
 					StringBuilder output = new StringBuilder();
 					if (statement.equals(")"))
@@ -300,6 +304,8 @@ public class TreeView extends ViewPart {
 						output.append("(");
 						++numtabs;
 					} else {
+						output.append(lineRetriever.retrieve(statement));
+						output.append(" ");
 						output.append(statement);
 					}
 					list.add(output.toString());

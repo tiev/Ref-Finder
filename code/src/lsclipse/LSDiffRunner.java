@@ -67,6 +67,7 @@ import changetypes.ASTVisitorAtomicChange;
 import changetypes.AtomicChange;
 import changetypes.AtomicChange.ChangeTypes;
 import changetypes.ChangeSet;
+import changetypes.CodeSegment;
 import changetypes.Fact;
 import changetypes.FactBase;
 
@@ -83,6 +84,17 @@ public class LSDiffRunner {
 	
 	public static Map<String, IJavaElement> getNewTypeToFileMap() {
 		return Collections.unmodifiableMap(newTypeToFileMap_);
+	}
+	
+	private static Map<String, CodeSegment> oldEntityLineMap_ = new ConcurrentHashMap<String, CodeSegment>();
+	private static Map<String, CodeSegment> newEntityLineMap_ = new ConcurrentHashMap<String, CodeSegment>();
+	
+	public static Map<String, CodeSegment> getOldEntityLineMap() {
+		return Collections.unmodifiableMap(oldEntityLineMap_);
+	}
+	
+	public static Map<String, CodeSegment> getNewEntityLineMap() {
+		return Collections.unmodifiableMap(newEntityLineMap_);
 	}
 	
 	public boolean doFactExtractionForRefFinder(String proj1, String proj2, ProgressBarDialog progbar) {
@@ -168,7 +180,7 @@ public class LSDiffRunner {
 		List<Future<FactBase>> futures = new LinkedList<Future<FactBase>>();
 		while (iter.hasNext()) {
 			ICompilationUnit file = iter.next();
-			FactGetter fg = new FactGetter(file, oldTypeToFileMap_);
+			FactGetter fg = new FactGetter(file, oldTypeToFileMap_, oldEntityLineMap_);
 			futures.add(execService.submit(fg));
 		}
 		execService.shutdown();
@@ -217,7 +229,7 @@ public class LSDiffRunner {
 		futures.clear();
 		while (iter.hasNext()) {
 			ICompilationUnit file = iter.next();
-			FactGetter fg = new FactGetter(file, newTypeToFileMap_);
+			FactGetter fg = new FactGetter(file, newTypeToFileMap_, newEntityLineMap_);
 			futures.add(execService.submit(fg));
 		}
 		execService.shutdown();
@@ -391,6 +403,7 @@ public class LSDiffRunner {
 	
 	static class FactGetter implements Callable<FactBase> {
 		Map<String, IJavaElement> typeToFileMap_;
+		Map<String, CodeSegment> entityLineMap_;
 		ICompilationUnit file_; 
 		
 		public FactGetter(ICompilationUnit file, Map<String, IJavaElement> typeToFileMap) {
@@ -399,6 +412,13 @@ public class LSDiffRunner {
 			typeToFileMap_ = typeToFileMap;
 		}
 
+		public FactGetter(ICompilationUnit file, Map<String, IJavaElement> typeToFileMap, Map<String, CodeSegment> entityLineMap) {
+			super();
+			file_ = file;
+			typeToFileMap_ = typeToFileMap;
+			entityLineMap_ = entityLineMap;
+		}
+		
 		@Override
 		public FactBase call() throws Exception {
 			//do some parsing
@@ -416,6 +436,7 @@ public class LSDiffRunner {
 		        ASTNode ast = parser.createAST(new NullProgressMonitor());
 		        ast.accept(acvisitor);
 		        typeToFileMap_.putAll(acvisitor.getTypeToFileMap());
+		        entityLineMap_.putAll(acvisitor.getEntityLineMap());
 		        
 		        return acvisitor.facts;
 	        } catch (Exception e){

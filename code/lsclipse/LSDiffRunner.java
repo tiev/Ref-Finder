@@ -461,6 +461,7 @@ public class LSDiffRunner
       {
         System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
         System.out.println("Exception: " + e.getMessage());
+        System.out.println("Exception: " + e.getStackTrace());
       }
       return new FactBase();
     }
