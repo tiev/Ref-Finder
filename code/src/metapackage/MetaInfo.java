@@ -52,6 +52,7 @@ public class MetaInfo {
 	public static final String resultsFile = new File(resDir, "Hierarchical_lsclipse_Temp.rub").getAbsolutePath();
 	public static final String ongoingResultsFile = new File(resDir, "exmp.rub").getAbsolutePath();
 	public static final String refsOnlyFile = new File(resDir, "output.rub").getAbsolutePath();
+	public static final String exportLineFile = new File(resDir, "lines.csv").getAbsolutePath();
 /*
 	public static String get2KB(int i){
 		File projectDir = new File (srcDir, folderName);

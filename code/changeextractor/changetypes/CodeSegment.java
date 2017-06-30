@@ -32,6 +32,12 @@ public class CodeSegment {
 		public String toString() {
 			return first_ + (last_ != first_ ? "-" + last_ : "");
 		}
+		public int getBeginning() {
+			return first_;
+		}
+		public int getEnd() {
+			return last_;
+		}
 	}
 	
 	private List<LineSegment> lines = new ArrayList<LineSegment>();

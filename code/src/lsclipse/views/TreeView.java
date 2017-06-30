@@ -18,6 +18,7 @@
 package lsclipse.views;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,6 +36,7 @@ import lsclipse.LSDiffRunner;
 import lsclipse.TopologicalSort;
 import lsclipse.dialogs.ProgressBarDialog;
 import lsclipse.dialogs.SelectProjectDialog;
+import lsclipse.utils.CsvWriter;
 import metapackage.MetaInfo;
 
 import org.eclipse.compare.CompareConfiguration;
@@ -64,9 +66,12 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.UIPreferenceInitializer;
 import org.eclipse.ui.part.ViewPart;
 
 import changetypes.CodeLineRetriever;
+import changetypes.CodeSegment;
+import changetypes.CodeSegment.LineSegment;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -95,6 +100,7 @@ public class TreeView extends ViewPart {
 	private Action doubleClickTreeAction;
 	private Action doubleClickListAction;
 	private Action selectAction;
+	private Action countAction;
 	private Composite parent;
 	private Vector<Node> nodeList;
 	private Map<String, Node> allNodes;
@@ -145,6 +151,7 @@ public class TreeView extends ViewPart {
 
 		IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
 		mgr.add(selectAction);
+		mgr.add(countAction);
 	}
 
 	private void contributeToActionBars() {
@@ -385,6 +392,43 @@ public class TreeView extends ViewPart {
 		selectAction.setImageDescriptor(PlatformUI.getWorkbench()
 				.getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER));
+		
+		// Count Action
+		countAction = new Action("Count refactoring SLOC") {
+			public void run() {
+				//TODO(Viet) show progress of counting
+				CodeLineRetriever lineRetriever = new CodeLineRetriever(LSDiffRunner.getOldEntityLineMap(), LSDiffRunner.getNewEntityLineMap());
+				Vector<String> lines = new Vector<String>();
+				//TODO(Viet): make retrieving lines concurrently
+				for (Node node : nodeList) {
+					String refName = node.getName();
+					for (String statement : node.getDependents()) {
+						CodeSegment segment = lineRetriever.findCode(statement);
+						if (segment == null)
+							continue;
+						for (LineSegment line : segment.getLines()) {
+							lines.add(CsvWriter.buildLine(refName,
+									segment.getFile().getResource().getLocation().toOSString(),
+									Integer.toString(line.getBeginning()), Integer.toString(line.getEnd())));
+						}
+					}
+				}
+				try {
+					FileWriter fw = new FileWriter(MetaInfo.exportLineFile);
+					for (String line : lines) {
+						fw.append(line);
+					}
+					fw.flush();
+					fw.close();
+				} catch (IOException e) {
+					System.err.println(e.getMessage());
+				}
+				//TODO(Viet): count on exported info, create result
+			}
+		};
+		countAction.setImageDescriptor(PlatformUI.getWorkbench()
+				.getSharedImages()
+				.getImageDescriptor(ISharedImages.IMG_ETOOL_DEF_PERSPECTIVE));
 	}
 
 	public void refreshTree() {
