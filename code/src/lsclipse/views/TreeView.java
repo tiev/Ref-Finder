@@ -17,6 +17,8 @@
 */
 package lsclipse.views;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.io.ByteArrayInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,11 +33,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
+import java.util.Scanner;
 
 import lsclipse.LSDiffRunner;
 import lsclipse.TopologicalSort;
 import lsclipse.dialogs.ProgressBarDialog;
 import lsclipse.dialogs.SelectProjectDialog;
+import lsclipse.dialogs.ConfirmProjectPathDialog;
 import lsclipse.utils.CsvWriter;
 import metapackage.MetaInfo;
 
@@ -51,17 +55,24 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISharedImages;
@@ -101,6 +112,8 @@ public class TreeView extends ViewPart {
 	private Action doubleClickListAction;
 	private Action selectAction;
 	private Action countAction;
+	private Action selectUccAction;
+	private String uccFilePath;
 	private Composite parent;
 	private Vector<Node> nodeList;
 	private Map<String, Node> allNodes;
@@ -151,6 +164,7 @@ public class TreeView extends ViewPart {
 
 		IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
 		mgr.add(selectAction);
+		mgr.add(selectUccAction);
 		mgr.add(countAction);
 	}
 
@@ -392,11 +406,38 @@ public class TreeView extends ViewPart {
 		selectAction.setImageDescriptor(PlatformUI.getWorkbench()
 				.getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER));
-		
+				
+		// Select UCC exe Action
+		selectUccAction = new Action("Browse UCC.exe") {
+			public void run() {
+				final FileDialog dialog = new FileDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.OPEN);
+				dialog.setText("Select UCC executable file");
+				dialog.setFilterExtensions(new String[] {"*.exe","*.*"});
+				String uccPath = dialog.open();
+				uccFilePath = uccPath;
+				this.setImageDescriptor(PlatformUI.getWorkbench()
+					.getSharedImages()
+					.getImageDescriptor(ISharedImages.IMG_OBJ_FILE));
+			}
+		};
+		selectUccAction.setImageDescriptor(PlatformUI.getWorkbench()
+				.getSharedImages()
+				.getImageDescriptor(ISharedImages.IMG_OBJ_ADD));
+
 		// Count Action
 		countAction = new Action("Count refactoring SLOC") {
 			public void run() {
+				// Do nothing if not extract refactor yet
+				if (baseproj == null || newproj == null)
+					return;
+				
+				// Browse UCC executable file if needed
+				if (uccFilePath == null || uccFilePath.isEmpty())
+					selectUccAction.run();
+				
 				//TODO(Viet) show progress of counting
+				
+				// Retrieving code lines and write to CSV
 				CodeLineRetriever lineRetriever = new CodeLineRetriever(LSDiffRunner.getOldEntityLineMap(), LSDiffRunner.getNewEntityLineMap());
 				Vector<String> lines = new Vector<String>();
 				//TODO(Viet): make retrieving lines concurrently
@@ -423,7 +464,61 @@ public class TreeView extends ViewPart {
 				} catch (IOException e) {
 					System.err.println(e.getMessage());
 				}
-				//TODO(Viet): count on exported info, create result
+
+				// Call UCC to count refactoring lines
+				ConfirmProjectPathDialog dialogPath = new ConfirmProjectPathDialog(
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+
+				try {
+					String path = "";
+					IJavaProject javaProject = JavaCore.create(baseproj);
+					for (IPackageFragmentRoot packFrag : javaProject.getAllPackageFragmentRoots()) {
+						if (packFrag.getKind() == IPackageFragmentRoot.K_SOURCE)
+							path = packFrag.getResource().getLocation().toOSString();
+					}
+					if (!path.isEmpty())
+						dialogPath.addBasePath(path);
+					path = "";
+					javaProject = JavaCore.create(newproj);
+					for (IPackageFragmentRoot packFrag : javaProject.getAllPackageFragmentRoots()) {
+						if (packFrag.getKind() == IPackageFragmentRoot.K_SOURCE)
+							path = packFrag.getResource().getLocation().toOSString();
+					}
+					if (!path.isEmpty())
+						dialogPath.addChangePath(path);
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
+				dialogPath.addBasePath(baseproj.getLocation().toOSString());
+				dialogPath.addBasePath(newproj.getLocation().toOSString());
+
+				final int returncode = dialogPath.open();
+				if (returncode > 0)
+					return;
+
+				String basepath, newpath;
+				basepath = dialogPath.getBasePath();
+				newpath = dialogPath.getChangePath();
+				try {
+					Process ucc = Runtime.getRuntime().exec(new String[] { uccFilePath, "-d", "-dir", basepath, newpath,
+							"-reffile", MetaInfo.exportLineFile }, null, MetaInfo.uccDir);
+
+					InputStream instream = ucc.getInputStream();
+					int size = 0;
+					byte[] buffer = new byte[1024];
+					while ((size = instream.read(buffer)) != -1)
+						System.out.write(buffer, 0, size);
+					ucc.waitFor();
+					Scanner scanner = new Scanner(new java.io.File(MetaInfo.uccCountFile));
+					String sResult = scanner.useDelimiter("\\Z").next();
+					scanner.close();
+					java.awt.datatransfer.StringSelection stringSelection = new StringSelection(sResult);
+					java.awt.datatransfer.Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+					clpbrd.setContents(stringSelection, null);
+				} catch (Exception e) {
+					System.err.println(e.getMessage());
+				}
+				
 			}
 		};
 		countAction.setImageDescriptor(PlatformUI.getWorkbench()

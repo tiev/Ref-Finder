@@ -35,6 +35,7 @@ public class MetaInfo {
 	public static final File resDir = new File(baseDir,"output");
 	public static final File fdbDir = new File(baseDir,"fdb");
 	public static final File lsclipseDir = new File(srcDir, "lsclipse");
+	public static final File uccDir = new File(baseDir, "ucc");
 	
 	public static final File included2kb = new File (srcDir, "2KB_lsdPred.rub");
 	public static final File includedDelta = new File (srcDir, "deltaKB_lsdPred.rub");
@@ -53,6 +54,7 @@ public class MetaInfo {
 	public static final String ongoingResultsFile = new File(resDir, "exmp.rub").getAbsolutePath();
 	public static final String refsOnlyFile = new File(resDir, "output.rub").getAbsolutePath();
 	public static final String exportLineFile = new File(resDir, "lines.csv").getAbsolutePath();
+	public static final String uccCountFile = new File(uccDir, "outfile_refactor_results.csv").getAbsolutePath();
 /*
 	public static String get2KB(int i){
 		File projectDir = new File (srcDir, folderName);

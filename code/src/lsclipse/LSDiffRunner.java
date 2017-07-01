@@ -363,6 +363,8 @@ public class LSDiffRunner {
 		resfile.mkdirs();
 		File fdbfile = (MetaInfo.fdbDir);
 		fdbfile.mkdirs();
+		File uccfile = (MetaInfo.uccDir);
+		uccfile.mkdirs();
 		//if 2KB_lsdPred not installed, install it now
 		File included2KBFile = MetaInfo.included2kb;
 		if (!included2KBFile.exists()) {

@@ -408,7 +408,6 @@ public class TreeView
         this.newproj);
       this.hashNode.put("[" + temp.getName() + "]", temp);
       this.allNodes.put(filledQuery, temp);
-      System.out.println(filledQuery);
       this.strNodeRelation.put(filledQuery, temp);
       
       this.nodeList.add(temp);
