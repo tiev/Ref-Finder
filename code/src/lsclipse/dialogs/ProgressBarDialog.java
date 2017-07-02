@@ -59,6 +59,9 @@ public class ProgressBarDialog {
 	public synchronized void dispose() {
 		shell.dispose();
 	}
+	public synchronized void setText(String title) {
+		shell.setText(title);
+	}
 	public synchronized void setStep(int phaseid) {
 		final String[] phases = { "Preparation", 
 			"Extract FB1: Base project facts",

@@ -33,6 +33,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.Scanner;
 
 import lsclipse.LSDiffRunner;
@@ -74,9 +79,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ExecutionException;
 import org.eclipse.ui.internal.UIPreferenceInitializer;
 import org.eclipse.ui.part.ViewPart;
 
@@ -105,6 +112,9 @@ public class TreeView extends ViewPart {
 	 * The ID of the view as specified by the extension.
 	 */
 	public static final String ID = "lsclipse.views.TreeView";
+	
+	public static final int NUM_THREADS = 4;
+	public static final long TIMEOUT = 60; // wait 60 minutes for line retriever
 
 	private List viewer;
 	private List list;
@@ -427,33 +437,52 @@ public class TreeView extends ViewPart {
 		// Count Action
 		countAction = new Action("Count refactoring SLOC") {
 			public void run() {
-				// Do nothing if not extract refactor yet
+				// Refactoring detection should have been run
 				if (baseproj == null || newproj == null)
-					return;
+					selectAction.run();
 				
 				// Browse UCC executable file if needed
 				if (uccFilePath == null || uccFilePath.isEmpty())
 					selectUccAction.run();
-				
-				//TODO(Viet) show progress of counting
+
+				long start = System.currentTimeMillis();
+
+				// open new log box
+				final ProgressBarDialog pbdiag = new ProgressBarDialog(
+						parent.getShell());
+				pbdiag.open();
+				pbdiag.setText("UCC counting...");
 				
 				// Retrieving code lines and write to CSV
+				pbdiag.setMessage("Retrieving code lines...\n");
 				CodeLineRetriever lineRetriever = new CodeLineRetriever(LSDiffRunner.getOldEntityLineMap(), LSDiffRunner.getNewEntityLineMap());
 				Vector<String> lines = new Vector<String>();
-				//TODO(Viet): make retrieving lines concurrently
+				ExecutorService execService = Executors.newFixedThreadPool(NUM_THREADS);
+				java.util.List<Future<Vector<String>>> futures = new java.util.LinkedList<Future<Vector<String>>>();
 				for (Node node : nodeList) {
-					String refName = node.getName();
-					for (String statement : node.getDependents()) {
-						CodeSegment segment = lineRetriever.findCode(statement);
-						if (segment == null)
-							continue;
-						for (LineSegment line : segment.getLines()) {
-							lines.add(CsvWriter.buildLine(refName,
-									segment.getFile().getResource().getLocation().toOSString(),
-									Integer.toString(line.getBeginning()), Integer.toString(line.getEnd())));
-						}
+					NodeLineGetter nlg = new NodeLineGetter(node, lineRetriever);
+					futures.add(execService.submit(nlg));
+				}
+				execService.shutdown();
+				try {
+					execService.awaitTermination(TIMEOUT, TimeUnit.MINUTES);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				for (Future<Vector<String>> f : futures) {
+					try {
+						lines.addAll(f.get());
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} catch (java.util.concurrent.ExecutionException e) {
+						e.printStackTrace();
 					}
 				}
+				pbdiag.appendLog("Retrievation OK! Got " + lines.size() + " line segments\n");
+
+				// Write refactoring lines to CSV
+				pbdiag.setMessage("Writing code lines to CSV...\n");
 				try {
 					FileWriter fw = new FileWriter(MetaInfo.exportLineFile);
 					for (String line : lines) {
@@ -464,8 +493,9 @@ public class TreeView extends ViewPart {
 				} catch (IOException e) {
 					System.err.println(e.getMessage());
 				}
+				pbdiag.appendLog("Writing done! File: " + MetaInfo.exportLineFile + "\n");
 
-				// Call UCC to count refactoring lines
+				// Get projects paths
 				ConfirmProjectPathDialog dialogPath = new ConfirmProjectPathDialog(
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 
@@ -499,26 +529,42 @@ public class TreeView extends ViewPart {
 				String basepath, newpath;
 				basepath = dialogPath.getBasePath();
 				newpath = dialogPath.getChangePath();
+
+				// Call UCC to count refactoring lines
+				pbdiag.setMessage("UCC counting...\n");
+				pbdiag.appendLog("+ UCC exec path: " + uccFilePath + "\n");
+				pbdiag.appendLog("+ Base project path: " + basepath + "\n");
+				pbdiag.appendLog("+ Changed project path: " + newpath + "\n");
 				try {
-					Process ucc = Runtime.getRuntime().exec(new String[] { uccFilePath, "-d", "-dir", basepath, newpath,
+					Process ucc = Runtime.getRuntime().exec(new String[] {
+							uccFilePath, "-d", "-dir", basepath, newpath, "*.java",
 							"-reffile", MetaInfo.exportLineFile }, null, MetaInfo.uccDir);
 
 					InputStream instream = ucc.getInputStream();
 					int size = 0;
 					byte[] buffer = new byte[1024];
-					while ((size = instream.read(buffer)) != -1)
-						System.out.write(buffer, 0, size);
+					while ((size = instream.read(buffer)) != -1) {
+						pbdiag.appendLog(new String(buffer, 0, size));
+					}
 					ucc.waitFor();
+					pbdiag.appendLog("Counting done! Results written to file " + MetaInfo.uccCountFile + "\n");
+					
 					Scanner scanner = new Scanner(new java.io.File(MetaInfo.uccCountFile));
 					String sResult = scanner.useDelimiter("\\Z").next();
 					scanner.close();
 					java.awt.datatransfer.StringSelection stringSelection = new StringSelection(sResult);
 					java.awt.datatransfer.Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
 					clpbrd.setContents(stringSelection, null);
+					MessageBox msg = new MessageBox(parent.getShell(), SWT.ICON_INFORMATION | SWT.OK);
+					msg.setMessage("Count results have been copied to clipboard!");
+					msg.open();
 				} catch (Exception e) {
 					System.err.println(e.getMessage());
 				}
-				
+
+				pbdiag.dispose();
+				long end = System.currentTimeMillis();
+				System.out.println("Total time: " + (end - start));				
 			}
 		};
 		countAction.setImageDescriptor(PlatformUI.getWorkbench()
@@ -679,8 +725,33 @@ public class TreeView extends ViewPart {
 
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
-
 	}
 
+	static class NodeLineGetter implements Callable<Vector<String>> {
+		Node node;
+		CodeLineRetriever retriever;
+		
+		public NodeLineGetter(Node node, CodeLineRetriever retriever) {
+			super();
+			this.node = node;
+			this.retriever = retriever;
+		}
+		
+		@Override
+		public Vector<String> call() throws Exception {
+			Vector<String> lines = new Vector<String>();
+			String refName = node.getName();
+			for (String statement : node.getDependents()) {
+				CodeSegment segment = retriever.findCode(statement);
+				if (segment == null)
+					continue;
+				for (LineSegment line : segment.getLines()) {
+					lines.add(CsvWriter.buildLine(refName,
+							segment.getFile().getResource().getLocation().toOSString(),
+							Integer.toString(line.getBeginning()), Integer.toString(line.getEnd())));
+				}
+			}
+			return lines;
+		}
+	}
 }

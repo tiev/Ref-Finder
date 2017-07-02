@@ -117,7 +117,6 @@ public class CodeLineRetriever {
 	}
 
 	private CodeSegment mapByRegex(Map<String, CodeSegment> map, String pattern) {
-		//TODO(Viet) optimize mapByRegex
 		Iterator<Map.Entry<String, CodeSegment>> iterator = map.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Map.Entry<String, CodeSegment> e = iterator.next();
