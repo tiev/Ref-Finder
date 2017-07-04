@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.Callable;
@@ -38,15 +39,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.Scanner;
-
-import lsclipse.LSDiffRunner;
-import lsclipse.TopologicalSort;
-import lsclipse.dialogs.ProgressBarDialog;
-import lsclipse.dialogs.SelectProjectDialog;
-import lsclipse.dialogs.ConfirmProjectPathDialog;
-import lsclipse.utils.CsvWriter;
-import metapackage.MetaInfo;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
@@ -60,17 +52,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Image;
@@ -83,13 +72,19 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ExecutionException;
-import org.eclipse.ui.internal.UIPreferenceInitializer;
 import org.eclipse.ui.part.ViewPart;
 
 import changetypes.CodeLineRetriever;
 import changetypes.CodeSegment;
 import changetypes.CodeSegment.LineSegment;
+import lsclipse.LSDiffRunner;
+import lsclipse.TopologicalSort;
+import lsclipse.dialogs.ConfirmProjectPathDialog;
+import lsclipse.dialogs.ProgressBarDialog;
+import lsclipse.dialogs.SelectProjectDialog;
+import lsclipse.linegetter.LineGetterFactory;
+import lsclipse.utils.CsvWriter;
+import metapackage.MetaInfo;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -741,8 +736,9 @@ public class TreeView extends ViewPart {
 		public Vector<String> call() throws Exception {
 			Vector<String> lines = new Vector<String>();
 			String refName = node.getName();
-			for (String statement : node.getDependents()) {
-				CodeSegment segment = retriever.findCode(statement);
+			java.util.List<CodeSegment> segments = LineGetterFactory.returnLineGetterByName(refName)
+					.retrieveCode(retriever, node.getDependents());
+			for (CodeSegment segment : segments) {
 				if (segment == null)
 					continue;
 				for (LineSegment line : segment.getLines()) {
