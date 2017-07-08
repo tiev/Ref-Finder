@@ -388,7 +388,7 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 				facts.add(Fact.makeExtendsFact(getQualifiedName(itb2),
 						getQualifiedName(itb)));
 				entityLineMap_.put(getEntityMapKey(getQualifiedName(itb2), getQualifiedName(itb)),
-						CodeSegment.extract(node));
+						CodeSegment.extractAtName(node));
 			}
 			if (node.isInterface()) {
 				for (ITypeBinding i2 : itb.getInterfaces()) {
@@ -397,7 +397,7 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 					facts.add(Fact.makeExtendsFact(getQualifiedName(i2),
 							getQualifiedName(itb)));
 					entityLineMap_.put(getEntityMapKey(getQualifiedName(i2), getQualifiedName(itb)),
-							CodeSegment.extract(node));
+							CodeSegment.extractAtName(node));
 				}
 			} else {
 				for (ITypeBinding i2 : itb.getInterfaces()) {
@@ -406,7 +406,7 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 					facts.add(Fact.makeImplementsFact(getQualifiedName(i2),
 							getQualifiedName(itb)));
 					entityLineMap_.put(getEntityMapKey(getQualifiedName(i2), getQualifiedName(itb)),
-							CodeSegment.extract(node));
+							CodeSegment.extractAtName(node));
 				}
 			}
 		} catch (Exception e) {

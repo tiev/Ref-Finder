@@ -18,11 +18,11 @@ public class ReplaceConditionalWithPolymorphism implements LineGetter {
 		List<CodeSegment> segments = new ArrayList<CodeSegment>();
 
 		for (String statement : dependents) {
-			if (statement.matches("^after_subtype.*"))
-				continue;
-			CodeSegment segment = retriever.findCode(statement);
-			if (segment != null)
-				segments.add(segment);
+			if (statement.matches(
+					"^(deleted_conditional|after_subtype|after_field|after_fieldoftype|added_method|added_calls|added_methodbody).*")) {
+				List<CodeSegment> segment = retriever.findCode(statement);
+				segments.addAll(segment);
+			}
 		}
 
 		return segments;

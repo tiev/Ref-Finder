@@ -6,11 +6,11 @@ import java.util.List;
 import changetypes.CodeLineRetriever;
 import changetypes.CodeSegment;
 
-public class FormTemplateMethod implements LineGetter {
+public class DecomposeConditional implements LineGetter {
 
 	@Override
 	public String getName() {
-		return "Form template method";
+		return "Decompose conditional";
 	}
 
 	@Override
@@ -18,11 +18,11 @@ public class FormTemplateMethod implements LineGetter {
 		List<CodeSegment> segments = new ArrayList<CodeSegment>();
 
 		for (String statement : dependents) {
-			if (statement.matches("^after_subtype.*"))
-				continue;
-			CodeSegment segment = retriever.findCode(statement);
-			if (segment != null)
-				segments.add(segment);
+			if (statement.matches("^(deleted_conditional|added_method|after_calls|added_methodbody|deleted_methodbody).*")) {
+				List<CodeSegment> segment = retriever.findCode(statement);
+				if (segment != null)
+					segments.addAll(segment);
+			}
 		}
 
 		return segments;

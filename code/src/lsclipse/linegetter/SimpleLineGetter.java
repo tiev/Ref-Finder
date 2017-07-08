@@ -14,10 +14,10 @@ public class SimpleLineGetter implements LineGetter {
 	public List<CodeSegment> retrieveCode(CodeLineRetriever retriever, List<String> dependents) {
 		List<CodeSegment> segments = new ArrayList<CodeSegment>();
 		for (String statement : dependents) {
-			CodeSegment segment = retriever.findCode(statement);
+			List<CodeSegment> segment = retriever.findCode(statement);
 			if (segment == null)
 				continue;
-			segments.add(segment);
+			segments.addAll(segment);
 		}
 		
 		return segments;

@@ -380,8 +380,6 @@ public class TreeView
     this.list.removeAll();
     this.nodeList.clear();
     this.viewer.removeAll();
-    System.out.println(this.baseproj.toString());
-    System.out.println(this.newproj.toString());
     
     TopologicalSort tSort = new TopologicalSort();
     

@@ -29,6 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
@@ -123,6 +124,7 @@ public class TreeView extends ViewPart {
 	private Vector<Node> nodeList;
 	private Map<String, Node> allNodes;
 	private HashMap<String, Node> hashNode;
+	private Map<String, Integer> refacCounts;
 	HashMap<String, Node> strNodeRelation;
 	GridData layoutData1;
 	ArrayList<EditorInput> listDiffs = new ArrayList<EditorInput>();
@@ -137,6 +139,7 @@ public class TreeView extends ViewPart {
 		nodeList = new Vector<Node>();
 		hashNode = new HashMap<String, Node>();
 		allNodes = new HashMap<String, Node>();
+		refacCounts = new HashMap<String, Integer>();
 	}
 
 	/**
@@ -454,8 +457,9 @@ public class TreeView extends ViewPart {
 				Vector<String> lines = new Vector<String>();
 				ExecutorService execService = Executors.newFixedThreadPool(NUM_THREADS);
 				java.util.List<Future<Vector<String>>> futures = new java.util.LinkedList<Future<Vector<String>>>();
+				int refacIndex = 0;
 				for (Node node : nodeList) {
-					NodeLineGetter nlg = new NodeLineGetter(node, lineRetriever);
+					NodeLineGetter nlg = new NodeLineGetter(node, lineRetriever, ++refacIndex);
 					futures.add(execService.submit(nlg));
 				}
 				execService.shutdown();
@@ -483,6 +487,9 @@ public class TreeView extends ViewPart {
 					for (String line : lines) {
 						fw.append(line);
 					}
+					for (Map.Entry<String, Integer> count : refacCounts.entrySet()) {
+						fw.append(CsvWriter.buildLine(count.getKey(), count.getValue().toString()));
+					}
 					fw.flush();
 					fw.close();
 				} catch (IOException e) {
@@ -490,6 +497,7 @@ public class TreeView extends ViewPart {
 				}
 				pbdiag.appendLog("Writing done! File: " + MetaInfo.exportLineFile + "\n");
 
+				
 				// Get projects paths
 				ConfirmProjectPathDialog dialogPath = new ConfirmProjectPathDialog(
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
@@ -598,7 +606,6 @@ public class TreeView extends ViewPart {
 					newproj);
 			hashNode.put("[" + temp.getName() + "]", temp);
 			allNodes.put(filledQuery, temp);
-			System.out.println(filledQuery);
 			strNodeRelation.put(filledQuery, temp);
 
 			nodeList.add(temp);
@@ -610,12 +617,15 @@ public class TreeView extends ViewPart {
 		// Print Summary Data
 		System.out.println("\nTotal time for inference(ms): "
 				+ (aftertime - beforetime));
+		refacCounts.clear();
 		Set<lsclipse.Node> nodes = tSort.getGraph();
 		int totalCount = 0;
 		for (lsclipse.Node node : nodes) {
 			if (node.numFound() > 0) {
 				totalCount += node.numFound();
 				System.out.print(node.toString() + ", ");
+				String name = node.getRefQry().getName();
+				refacCounts.put(getNiceName(name), node.numFound());
 			}
 		}
 		System.out.println("\nFor a total of " + totalCount
@@ -626,13 +636,18 @@ public class TreeView extends ViewPart {
 		int parenthIndex = filledQuery.indexOf('(');
 		return filledQuery.substring(0, parenthIndex);
 	}
+	
+	private String getNiceName(String name) {
+		String nicename = name.replace('_', ' ');
+		nicename = nicename.substring(0, 1).toUpperCase()
+				+ nicename.substring(1);
+		return nicename;
+	}
 
 	private Node makeNode(String filledQuery, java.util.List<String> children,
 			IProject baseProject, IProject newProject) {
 		String name = getName(filledQuery);
-		String nicename = name.replace('_', ' ');
-		nicename = nicename.substring(0, 1).toUpperCase()
-				+ nicename.substring(1);
+		String nicename = getNiceName(name);
 		int nameIndex = filledQuery.indexOf(name);
 
 		Node temp = new Node(nicename, null);
@@ -725,11 +740,13 @@ public class TreeView extends ViewPart {
 	static class NodeLineGetter implements Callable<Vector<String>> {
 		Node node;
 		CodeLineRetriever retriever;
+		int refacIndex;
 		
-		public NodeLineGetter(Node node, CodeLineRetriever retriever) {
+		public NodeLineGetter(Node node, CodeLineRetriever retriever, int index) {
 			super();
 			this.node = node;
 			this.retriever = retriever;
+			this.refacIndex = index;
 		}
 		
 		@Override
@@ -742,7 +759,7 @@ public class TreeView extends ViewPart {
 				if (segment == null)
 					continue;
 				for (LineSegment line : segment.getLines()) {
-					lines.add(CsvWriter.buildLine(refName,
+					lines.add(CsvWriter.buildLine(Integer.toString(refacIndex), refName,
 							segment.getFile().getResource().getLocation().toOSString(),
 							Integer.toString(line.getBeginning()), Integer.toString(line.getEnd())));
 				}

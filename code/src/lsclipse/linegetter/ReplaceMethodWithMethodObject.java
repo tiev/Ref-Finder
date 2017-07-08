@@ -18,10 +18,9 @@ public class ReplaceMethodWithMethodObject implements LineGetter {
 		List<CodeSegment> segments = new ArrayList<CodeSegment>();
 		
 		for (String statement : dependents) {
-			if (statement.matches("^(added_method|added_calls).*")) {
-				CodeSegment segment = retriever.findCode(statement);
-				if (segment != null)
-					segments.add(segment);
+			if (statement.matches("^(added_method|added_calls|after_method).*")) {
+				List<CodeSegment> segment = retriever.findCode(statement);
+				segments.addAll(segment);
 			}
 		}
 		

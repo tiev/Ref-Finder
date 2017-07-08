@@ -83,6 +83,10 @@ public class CodeSegment {
 		return extractNode(node);
 	}
 	
+	public static CodeSegment extractAtName(TypeDeclaration node) {
+		return extractNode(node.getName());
+	}
+	
 	public static CodeSegment extract(TypeDeclaration node, IVariableBinding ivb) {
 		CompilationUnit cu = (CompilationUnit) node.getRoot();
 		ASTNode vdf = cu.findDeclaringNode(ivb);
@@ -112,7 +116,7 @@ public class CodeSegment {
 	public static CodeSegment extract(AnonymousClassDeclaration node) {
 		return extractNode(node);
 	}
-	
+		
 	public static CodeSegment extract(MethodDeclaration node) {
 		return extractNode(node);
 	}
