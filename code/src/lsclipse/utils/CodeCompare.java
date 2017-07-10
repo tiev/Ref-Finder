@@ -35,7 +35,7 @@ public class CodeCompare {
 		return false;
 	}
 
-	// Make sure the longest common string is at most SIMILARITY_THRESHOLD of
+	// Make sure the longest common string is at most DIFFERENCE_THRESHOLD of
 	// the longer code fragment.
 	public static boolean contrast(String left, String right) {
 		String longer = getLongerString(left, right);
