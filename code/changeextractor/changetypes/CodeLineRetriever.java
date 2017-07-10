@@ -43,11 +43,26 @@ public class CodeLineRetriever {
 			}
 			sb.append(")");
 		}
-		else if (statement.matches(PATTERN_EXTRACT_METHOD.pattern())){
-			sb.append("(_, ");
-			sb.append(findCode(statement));
-			sb.append(")");
+		else {
+			if (statement.matches(PATTERN_EXTRACT_METHOD.pattern())
+					|| statement.matches(PATTERN_REPLACE_CON_FAC_METHOD.pattern())
+					|| statement.matches(PATTERN_REPLACE_TYPE_CODE_SUBCLASSES.pattern())
+					) {
+				sb.append("(_, ");
+				sb.append(findCode(statement));
+				sb.append(")");
+			}
+			
+			if (statement.matches(PATTERN_MOVE_FIELD.pattern())
+					|| statement.matches(PATTERN_MOVE_METHOD.pattern())
+					|| statement.matches(PATTERN_PULL_PUSH.pattern())
+					) {
+				sb.append("(");
+				sb.append(findCode(statement));
+				sb.append(")");
+			}
 		}
+		//TODO(Viet) add retrieving code lines for other facts
 		return sb.toString();
 	}
 
@@ -127,14 +142,14 @@ public class CodeLineRetriever {
 				String target = getParamAt(paramStr, 2);
 				String fullSourceName = "\"" + source + "#" + shortName + "\"";
 				String fullTargetName = "\"" + target + "#" + shortName + "\"";
-				String deletedStatement = "deleted_field(" + fullSourceName + ASTVisitorAtomicChange.PARAM_SEPARATOR +
-						"\"" + shortName + "\"" + ASTVisitorAtomicChange.PARAM_SEPARATOR +
-						"\"" + source + "\"";
+				String deletedStatement = "deleted_field(" + fullSourceName + "," +
+						"\"" + shortName + "\"" + "," +
+						"\"" + source + "\")";
 				ret.addAll(findCode(deletedStatement));
 				
-				String addedStatement = "added_field(" + fullTargetName + ASTVisitorAtomicChange.PARAM_SEPARATOR +
-						"\"" + shortName + "\"" + ASTVisitorAtomicChange.PARAM_SEPARATOR +
-						"\"" + target + "\"";
+				String addedStatement = "added_field(" + fullTargetName + "," +
+						"\"" + shortName + "\"" + "," +
+						"\"" + target + "\")";
 				ret.addAll(findCode(addedStatement));
 			}
 
@@ -146,14 +161,14 @@ public class CodeLineRetriever {
 				String target = getParamAt(paramStr, 2);
 				String fullSourceName = "\"" + source + "#" + shortName + "\"";
 				String fullTargetName = "\"" + target + "#" + shortName + "\"";
-				String deletedStatement = "deleted_method(" + fullSourceName + ASTVisitorAtomicChange.PARAM_SEPARATOR +
-						"\"" + shortName + "\"" + ASTVisitorAtomicChange.PARAM_SEPARATOR +
-						"\"" + source + "\"";
+				String deletedStatement = "deleted_method(" + fullSourceName + "," +
+						"\"" + shortName + "\"" + "," +
+						"\"" + source + "\")";
 				ret.addAll(findCode(deletedStatement));
 				
-				String addedStatement = "added_method(" + fullTargetName + ASTVisitorAtomicChange.PARAM_SEPARATOR +
-						"\"" + shortName + "\"" + ASTVisitorAtomicChange.PARAM_SEPARATOR +
-						"\"" + target + "\"";
+				String addedStatement = "added_method(" + fullTargetName + "," +
+						"\"" + shortName + "\"" + "," +
+						"\"" + target + "\")";
 				ret.addAll(findCode(addedStatement));
 			}
 			
