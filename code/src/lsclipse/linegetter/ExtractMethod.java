@@ -18,7 +18,7 @@ public class ExtractMethod implements LineGetter {
 		List<CodeSegment> segments = new ArrayList<CodeSegment>();
 
 		for (String statement : dependents) {
-			if (statement.matches("^(added_method|after_calls|added_methodbody|deleted_methodbody).*")) {
+			if (statement.matches("^(added_method|after_calls|added_methodbody).*")) {
 				List<CodeSegment> segment = retriever.findCode(statement);
 				if (segment != null)
 					segments.addAll(segment);
