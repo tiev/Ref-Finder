@@ -233,7 +233,7 @@ public class CodeLineRetriever {
 	}
 
 	public String getParamAt(String params, int index) {
-		Matcher mm = Pattern.compile("(\"[^\"]+\"|\\?)").matcher(params);
+		Matcher mm = Pattern.compile("(\"[^\"]*\"|\\?)").matcher(params);
 		int i = 0;
 		while (i <= index) {
 			mm.find();
