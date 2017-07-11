@@ -18,7 +18,7 @@ public class DecomposeConditional implements LineGetter {
 		List<CodeSegment> segments = new ArrayList<CodeSegment>();
 
 		for (String statement : dependents) {
-			if (statement.matches("^(deleted_conditional|added_method|after_calls|added_methodbody|deleted_methodbody).*")) {
+			if (statement.matches("^(deleted_conditional|added_method|after_calls|added_methodbody|deleted_methodbody|extract_method).*")) {
 				List<CodeSegment> segment = retriever.findCode(statement);
 				if (segment != null)
 					segments.addAll(segment);
