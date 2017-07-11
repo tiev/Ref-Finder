@@ -32,7 +32,7 @@ public class LineGetterFactory {
 			// + Replace array with object
 			new ReplaceConditionalWithPolymorphism(),
 			// + Replace data with object
-			// + Replace exception with test <!> affect whole method body
+			new ReplaceExceptionWithTest(),
 			new ReplaceMethodWithMethodObject(),
 			// + Replace nested cond guard clauses
 			// + Replace param explicit methods
@@ -74,7 +74,7 @@ public class LineGetterFactory {
 			// + Remove setting method
 			// + Replace error code with exception
 			// + Self encapsulate field
-			// + Extract hierarchy <!> ignore some compount refactoring that cannot trace
+			// + Extract hierarchy <!> ignore some compound refactoring that cannot trace
 			// + Replace temp with query
 			//-------------------
 			));
