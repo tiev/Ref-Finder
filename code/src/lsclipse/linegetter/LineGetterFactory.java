@@ -17,7 +17,7 @@ public class LineGetterFactory {
 			// + Encapsulate collection
 			new ExtractMethod(),
 			// + Form template method
-			// + Inline method
+			new InlineMethod(),
 			// + Inline temp <!> affect whole method body
 			// + Introduce assertion <!> affect whole method body
 			// + Introduce explaining variable <!> affect whole method body
