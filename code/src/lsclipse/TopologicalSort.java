@@ -99,7 +99,7 @@ public class TopologicalSort {
 				"deleted_field(?fFullName, ?fShortName, ?tFullName), "
 						+ "added_field(?f1FullName, ?fShortName, ?t1FullName), "
 						+ "deleted_accesses(?fFullName, ?mFullName), "
-						+ "added_accesses(?f1FullName, ?nFullName), "
+						+ "added_accesses(?f1FullName, ?mFullName), "
 						+ "before_type(?tFullName, ?, ?package), "
 						+ "after_type(?t1FullName, ?, ?package), "
 						+ "NOT(equals(?tFullName, ?t1FullName))");

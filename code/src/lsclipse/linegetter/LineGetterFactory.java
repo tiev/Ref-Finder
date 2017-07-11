@@ -26,7 +26,7 @@ public class LineGetterFactory {
 			new MoveMethod(),
 			// + Parameterize method
 			// + Preserve whole object
-			// + Remove assignment to parameters
+			// + Remove assignment to parameters <!> affect whole method body
 			// + Remove control flag
 			// + Rename method <!> affect whole method body
 			// + Replace array with object
