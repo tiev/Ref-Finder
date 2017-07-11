@@ -731,12 +731,12 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 				facts.add(Fact.makeGetterFact(getQualifiedName(mtb),
 						getQualifiedName(node.resolveFieldBinding())));
 				entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb), getQualifiedName(node.resolveFieldBinding())),
-						CodeSegment.extract(node));
+						CodeSegment.extractMethod(mtb, node));
 			} else if (simpleMethodName.toLowerCase().startsWith("set")) {
 				facts.add(Fact.makeSetterFact(getQualifiedName(mtb),
 						getQualifiedName(node.resolveFieldBinding())));
 				entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb), getQualifiedName(node.resolveFieldBinding())),
-						CodeSegment.extract(node));
+						CodeSegment.extractMethod(mtb, node));
 			}
 		} catch (Exception e) {
 			System.err.println("Cannot resolve bindings for exceptions");

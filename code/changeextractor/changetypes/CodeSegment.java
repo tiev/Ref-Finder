@@ -142,6 +142,16 @@ public class CodeSegment {
 		return extractNode(node);
 	}
 	
+	public static CodeSegment extractMethod(IMethodBinding mtb, ASTNode node) {
+		try {
+			CompilationUnit cu = (CompilationUnit) node.getRoot();
+			ASTNode mNode = cu.findDeclaringNode(mtb);
+			return extractNode(mNode);
+		} catch (Exception e) {
+			return extractNode(node);
+		}
+	}
+	
 	public static CodeSegment extract(TryStatement node) {
 		return extractNode(node);
 	}
