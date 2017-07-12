@@ -8,9 +8,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+
 public class CodeLineRetriever {
 	private Map<String, CodeSegment> oldMap_, newMap_;
+	private Map<String, MethodDeclaration> oldMethodMap_, newMethodMap_;
 	public static String PARAM_RGX = "\\((.*)\\)";
+	private static Pattern PATTERN_PARAM = Pattern.compile("^[^\\(]*" + PARAM_RGX + "$");
 	private static Pattern PATTERN_ATOMIC = Pattern.compile("^(added|deleted|before|after)_([^\\(]+)" + PARAM_RGX + "$");
 	private static Pattern PATTERN_EXTRACT_METHOD = Pattern.compile("^extract_method" + PARAM_RGX + "$");
 	private static Pattern PATTERN_MOVE_FIELD = Pattern.compile("^move_field" + PARAM_RGX + "$");
@@ -22,6 +26,15 @@ public class CodeLineRetriever {
 	public CodeLineRetriever(Map<String, CodeSegment> oldMap, Map<String, CodeSegment> newMap) {
 		oldMap_ = oldMap;
 		newMap_ = newMap;
+		oldMethodMap_ = new HashMap<String, MethodDeclaration>();
+		newMethodMap_ = new HashMap<String, MethodDeclaration>();
+	}
+
+	public CodeLineRetriever(Map<String, CodeSegment> oldMap, Map<String, CodeSegment> newMap, Map<String, MethodDeclaration> oldMethodMap, Map<String, MethodDeclaration> newMethodMap) {
+		oldMap_ = oldMap;
+		newMap_ = newMap;
+		oldMethodMap_ = oldMethodMap;
+		newMethodMap_ = newMethodMap;
 	}
 
 	public String retrieve(String statement) {
@@ -255,5 +268,29 @@ public class CodeLineRetriever {
 			sb.append(mm.group(1));
 		}
 		return sb.toString();
+	}
+
+	public String getParamStr(String statement) {
+		Matcher m = PATTERN_PARAM.matcher(statement);
+		if (m.find()) {
+			return m.group(1);
+		}
+		return "";
+	}
+
+	public List<CodeSegment> findCodeInOldMethod(String expression, String methodName) {
+		MethodDeclaration md = oldMethodMap_.get(methodName);
+		if (md != null) {
+			md.getClass();
+		}
+		return null;
+	}
+
+	public List<CodeSegment> findCodeInNewMethod(String expression, String methodName) {
+		MethodDeclaration md = newMethodMap_.get(methodName);
+		if (md != null) {
+			md.getClass();
+		}
+		return null;
 	}
 }

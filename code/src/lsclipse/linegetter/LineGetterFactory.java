@@ -12,7 +12,6 @@ public class LineGetterFactory {
 			// + Change uni to bi
 			// + Consolidate cond expression
 			// + Consolidate duplicate cond fragments
-			// + Decompose conditional
 			new DecomposeConditional(),
 			// + Encapsulate collection
 			new ExtractMethod(),
@@ -21,6 +20,7 @@ public class LineGetterFactory {
 			// + Inline temp <!> affect whole method body
 			// + Introduce assertion <!> affect whole method body
 			// + Introduce explaining variable <!> affect whole method body
+			new IntroduceExplainingVariable(),
 			// + Introduce null object
 			// + Introduce parameter object
 			new MoveMethod(),

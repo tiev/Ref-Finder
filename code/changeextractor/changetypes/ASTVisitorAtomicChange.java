@@ -76,6 +76,7 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 	public FactBase facts;
 	private Map<String, IJavaElement> typeToFileMap_ = new HashMap<String, IJavaElement>();
 	private Map<String, CodeSegment> entityLineMap_ = new HashMap<String, CodeSegment>();
+	private Map<String, MethodDeclaration> methodNodeMap_ = new HashMap<String, MethodDeclaration>();
 
 	public Map<String, IJavaElement> getTypeToFileMap() {
 		return Collections.unmodifiableMap(typeToFileMap_);
@@ -83,6 +84,10 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 	
 	public Map<String, CodeSegment> getEntityLineMap() {
 		return Collections.unmodifiableMap(entityLineMap_);
+	}
+	
+	public Map<String, MethodDeclaration> getMethodNodeMap() {
+		return Collections.unmodifiableMap(methodNodeMap_);
 	}
 
 	private List<String> allowedFieldMods_ = Arrays.asList(new String[] {
@@ -614,6 +619,7 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		}
 		
 		entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb)), CodeSegment.extract(node));
+		methodNodeMap_.put(getEntityMapKey(getQualifiedName(mtb)), node);
 		
 		// make return type fact
 		try {
