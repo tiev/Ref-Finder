@@ -183,8 +183,20 @@ public class CodeSegment {
 	public static CodeSegment extract(VariableDeclarationFragment node) {
 		return extractNode(node);
 	}
+
+	public static CodeSegment extract(VariableDeclaration node) {
+		return extractNode(node);
+	}
 	
 	public static CodeSegment extract(Statement node) {
+		return extractNode(node);
+	}
+	
+	public static CodeSegment extract(Expression node) {
+		return extractNode(node);
+	}
+	
+	public static CodeSegment extract(ASTNode node) {
 		return extractNode(node);
 	}
 }

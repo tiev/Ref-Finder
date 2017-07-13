@@ -1,14 +1,34 @@
 package changetypes;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
+
+import lsclipse.utils.StringCleaner;
 
 public class CodeLineRetriever {
 	private Map<String, CodeSegment> oldMap_, newMap_;
@@ -281,7 +301,7 @@ public class CodeLineRetriever {
 	public List<CodeSegment> findCodeInOldMethod(String expression, String methodName) {
 		MethodDeclaration md = oldMethodMap_.get(methodName);
 		if (md != null) {
-			md.getClass();
+			return findCodeInMethod(expression, md);
 		}
 		return null;
 	}
@@ -289,8 +309,143 @@ public class CodeLineRetriever {
 	public List<CodeSegment> findCodeInNewMethod(String expression, String methodName) {
 		MethodDeclaration md = newMethodMap_.get(methodName);
 		if (md != null) {
-			md.getClass();
+			return findCodeInMethod(expression, md);
 		}
 		return null;
+	}
+	
+	public List<CodeSegment> findCodeInMethod(String expression, MethodDeclaration node) {
+		List<CodeSegment> ret = new ArrayList<CodeSegment>();
+		Queue<Statement> queue = new ArrayDeque<Statement>();
+		Block body = node.getBody();
+		
+		// Add first level statements
+		if (body != null) {
+			for (Object statement : body.statements()) {
+				if (StringCleaner.cleanupString(statement.toString()).contains(expression)) {
+					queue.add((Statement) statement);
+				}
+			}
+		}
+		
+		while (!queue.isEmpty()) {
+			Statement statement = queue.poll();
+
+			// Bitwise operator "|" in condition is to force evaluate all parts in condition
+			boolean isLast = true;
+			switch (statement.getNodeType()) {
+			case ASTNode.BLOCK:
+				for (Object sta : ((Block) statement).statements())
+					if (tryQueue(queue, (Statement)sta, expression))
+						isLast = false;
+				break;
+			case ASTNode.DO_STATEMENT:
+				DoStatement doSta = (DoStatement) statement;
+				if (tryQueue(queue, doSta.getBody(), expression)
+						| tryExtract(ret, doSta.getExpression(), expression))
+					isLast = false;
+				break;
+			case ASTNode.ENHANCED_FOR_STATEMENT:
+				EnhancedForStatement eforSta = (EnhancedForStatement) statement;
+				if (tryQueue(queue, eforSta.getBody(), expression)
+						| tryExtract(ret, eforSta.getExpression(), expression)
+						| tryExtract(ret, eforSta.getParameter(), expression)
+						)
+					isLast = false;
+				break;
+			case ASTNode.FOR_STATEMENT:
+				ForStatement forSta = (ForStatement) statement;
+				if (tryQueue(queue, forSta.getBody(), expression)
+						| tryExtract(ret, forSta.getExpression(), expression)
+						)
+					isLast = false;
+				for (Object ini : forSta.initializers())
+					if (tryExtract(ret, (Expression)ini, expression))
+						isLast = false;
+				for (Object u : forSta.updaters())
+					if (tryExtract(ret, (Expression)u, expression))
+						isLast = false;
+				break;
+			case ASTNode.IF_STATEMENT:
+				IfStatement ifSta = (IfStatement) statement;
+				if (tryExtract(ret, ifSta.getExpression(), expression)
+						| tryQueue(queue, ifSta.getThenStatement(), expression)
+						| tryQueue(queue, ifSta.getElseStatement(), expression))
+					isLast = false;
+				break;
+			case ASTNode.LABELED_STATEMENT:
+				LabeledStatement labelSta = (LabeledStatement) statement;
+				if (tryExtract(ret, labelSta.getLabel(), expression)
+						| tryQueue(queue, labelSta.getBody(), expression)
+						)
+					isLast = false;
+				break;
+			case ASTNode.SWITCH_STATEMENT:
+				SwitchStatement switchSta = (SwitchStatement) statement;
+				if (tryExtract(ret, switchSta.getExpression(), expression))
+					isLast = false;
+				for (Object ca : switchSta.statements())
+					if (tryQueue(queue, (Statement)ca, expression))
+						isLast = false;
+				break;
+			case ASTNode.SYNCHRONIZED_STATEMENT:
+				SynchronizedStatement syncSta = (SynchronizedStatement) statement;
+				if (tryExtract(ret, syncSta.getExpression(), expression)
+						| tryQueue(queue, syncSta.getBody(), expression))
+					isLast = false;
+				break;
+			case ASTNode.TRY_STATEMENT:
+				TryStatement trySta = (TryStatement) statement;
+				if (tryQueue(queue, trySta.getBody(), expression)
+						| tryQueue(queue, trySta.getFinally(), expression))
+					isLast = false;
+				for (Object ica : trySta.catchClauses()) {
+					CatchClause ca = (CatchClause) ica;
+					if (tryQueue(queue, ca.getBody(), expression)
+							| tryExtract(ret, ca.getException(), expression))
+						isLast = false;
+				}
+				for (Object re : trySta.resources())
+					if (tryExtract(ret, (ASTNode)re, expression))
+						isLast = false;
+				break;
+			case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+				VariableDeclarationStatement varSta = (VariableDeclarationStatement) statement;
+				for (Object frag : varSta.fragments())
+					if (tryExtract(ret, (ASTNode) frag, expression))
+						isLast = false;
+				break;
+			case ASTNode.WHILE_STATEMENT:
+				WhileStatement whileSta = (WhileStatement) statement;
+				if (tryExtract(ret, whileSta.getExpression(), expression)
+						| tryQueue(queue, whileSta.getBody(), expression))
+					isLast = false;
+				break;
+			}
+			if (isLast)
+				ret.add(CodeSegment.extract(statement));
+		}
+		return ret;
+	}
+	
+	private boolean expectedCode(Object statement, String expression) {
+		return StringCleaner.cleanupString(statement.toString())
+				.contains(expression);
+	}
+	
+	private boolean tryQueue(Queue<Statement> queue, Statement statement, String expression) {
+		if (statement != null && expectedCode(statement, expression)) {
+			queue.add(statement);
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean tryExtract(List<CodeSegment> list, ASTNode node, String expression) {
+		if (node != null && expectedCode(node, expression)) {
+			list.add(CodeSegment.extract(node));
+			return true;
+		}
+		return false;
 	}
 }
