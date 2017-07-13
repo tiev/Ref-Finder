@@ -10,13 +10,20 @@ import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -28,11 +35,11 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import changetypes.CodeSegment.LineSegment;
 import lsclipse.utils.StringCleaner;
 
 public class CodeLineRetriever {
 	private Map<String, CodeSegment> oldMap_, newMap_;
-	private Map<String, MethodDeclaration> oldMethodMap_, newMethodMap_;
 	public static String PARAM_RGX = "\\((.*)\\)";
 	private static Pattern PATTERN_PARAM = Pattern.compile("^[^\\(]*" + PARAM_RGX + "$");
 	private static Pattern PATTERN_ATOMIC = Pattern.compile("^(added|deleted|before|after)_([^\\(]+)" + PARAM_RGX + "$");
@@ -46,15 +53,6 @@ public class CodeLineRetriever {
 	public CodeLineRetriever(Map<String, CodeSegment> oldMap, Map<String, CodeSegment> newMap) {
 		oldMap_ = oldMap;
 		newMap_ = newMap;
-		oldMethodMap_ = new HashMap<String, MethodDeclaration>();
-		newMethodMap_ = new HashMap<String, MethodDeclaration>();
-	}
-
-	public CodeLineRetriever(Map<String, CodeSegment> oldMap, Map<String, CodeSegment> newMap, Map<String, MethodDeclaration> oldMethodMap, Map<String, MethodDeclaration> newMethodMap) {
-		oldMap_ = oldMap;
-		newMap_ = newMap;
-		oldMethodMap_ = oldMethodMap;
-		newMethodMap_ = newMethodMap;
 	}
 
 	public String retrieve(String statement) {
@@ -303,7 +301,7 @@ public class CodeLineRetriever {
 	}
 	
 	public List<CodeSegment> findCodeOldMethodName(String methodName) {
-		MethodDeclaration md = oldMethodMap_.get(methodName);
+		MethodDeclaration md = findOldMethod(methodName);
 		if (md != null) {
 			List<CodeSegment> ret = new ArrayList<CodeSegment>();
 			ret.add(CodeSegment.extract(md.getName()));
@@ -313,17 +311,60 @@ public class CodeLineRetriever {
 	}
 
 	public List<CodeSegment> findCodeNewMethodName(String methodName) {
-		MethodDeclaration md = newMethodMap_.get(methodName);
+		MethodDeclaration md = findNewMethod(methodName);
 		if (md != null) {
 			List<CodeSegment> ret = new ArrayList<CodeSegment>();
 			ret.add(CodeSegment.extract(md.getName()));
 			return ret;
 		}
 		return null;
+	} 
+	
+	public MethodDeclaration findMethod(Map<String, CodeSegment> map, String methodName) {
+		try {
+			CodeSegment methodSegment = map.get(methodName);
+			ICompilationUnit file = (ICompilationUnit) methodSegment.getFile();
+			ASTParser parser = ASTParser.newParser(AST.JLS8);
+			parser.setKind(ASTParser.K_COMPILATION_UNIT);
+			parser.setSource(file);
+			parser.setResolveBindings(true);
+			CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+			MethodSearchVisitor visitor = new MethodSearchVisitor(methodSegment);
+			cu.accept(visitor);
+			if (visitor.method != null)
+				return visitor.method;
+		} catch (Exception e) {
+			System.err.println("Cannot find method declaration " + methodName);
+		}
+		
+		return null;
+	}
+
+	public MethodDeclaration findOldMethod(String methodName) {
+		return findMethod(oldMap_, methodName);
+	}
+	
+	public MethodDeclaration findNewMethod(String methodName) {
+		return findMethod(newMap_, methodName);
+	}
+	
+	private class MethodSearchVisitor extends ASTVisitor {
+		public MethodDeclaration method;
+		private CodeSegment methodSegment;
+		
+		public MethodSearchVisitor(CodeSegment segment) {
+			methodSegment = segment;
+		}
+		
+		public boolean visit(MethodDeclaration node) {
+			if (CodeSegment.extract(node).equals(methodSegment))
+				method = node;
+			return false;
+		}
 	}
 
 	public List<CodeSegment> findCodeInOldMethod(String expression, String methodName) {
-		MethodDeclaration md = oldMethodMap_.get(methodName);
+		MethodDeclaration md = findOldMethod(methodName);
 		if (md != null) {
 			return findCodeInMethod(expression, md);
 		}
@@ -331,7 +372,7 @@ public class CodeLineRetriever {
 	}
 
 	public List<CodeSegment> findCodeInNewMethod(String expression, String methodName) {
-		MethodDeclaration md = newMethodMap_.get(methodName);
+		MethodDeclaration md = findNewMethod(methodName);
 		if (md != null) {
 			return findCodeInMethod(expression, md);
 		}

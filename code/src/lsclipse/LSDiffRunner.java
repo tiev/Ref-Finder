@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import changetypes.ASTVisitorAtomicChange;
@@ -98,18 +99,7 @@ public class LSDiffRunner {
 	public static Map<String, CodeSegment> getNewEntityLineMap() {
 		return Collections.unmodifiableMap(newEntityLineMap_);
 	}
-	
-	public static Map<String, MethodDeclaration> oldMethodNodeMap_ = new ConcurrentHashMap<String, MethodDeclaration>();
-	public static Map<String, MethodDeclaration> newMethodNodeMap_ = new ConcurrentHashMap<String, MethodDeclaration>();
-
-	public static Map<String, MethodDeclaration> getOldMethodNodeMap() {
-		return Collections.unmodifiableMap(oldMethodNodeMap_);
-	}
-
-	public static Map<String, MethodDeclaration> getNewMethodNodeMap() {
-		return Collections.unmodifiableMap(newMethodNodeMap_);
-	}
-	
+		
 	public boolean doFactExtractionForRefFinder(String proj1, String proj2, ProgressBarDialog progbar) {
 		if(!doFactExtraction(proj1, proj2, progbar))
 			return false;
@@ -193,7 +183,7 @@ public class LSDiffRunner {
 		List<Future<FactBase>> futures = new LinkedList<Future<FactBase>>();
 		while (iter.hasNext()) {
 			ICompilationUnit file = iter.next();
-			FactGetter fg = new FactGetter(file, oldTypeToFileMap_, oldEntityLineMap_, oldMethodNodeMap_);
+			FactGetter fg = new FactGetter(file, oldTypeToFileMap_, oldEntityLineMap_);
 			futures.add(execService.submit(fg));
 		}
 		execService.shutdown();
@@ -242,7 +232,7 @@ public class LSDiffRunner {
 		futures.clear();
 		while (iter.hasNext()) {
 			ICompilationUnit file = iter.next();
-			FactGetter fg = new FactGetter(file, newTypeToFileMap_, newEntityLineMap_, newMethodNodeMap_);
+			FactGetter fg = new FactGetter(file, newTypeToFileMap_, newEntityLineMap_);
 			futures.add(execService.submit(fg));
 		}
 		execService.shutdown();
@@ -419,7 +409,6 @@ public class LSDiffRunner {
 	static class FactGetter implements Callable<FactBase> {
 		Map<String, IJavaElement> typeToFileMap_;
 		Map<String, CodeSegment> entityLineMap_;
-		Map<String, MethodDeclaration> methodNodeMap_;
 		ICompilationUnit file_; 
 		
 		public FactGetter(ICompilationUnit file, Map<String, IJavaElement> typeToFileMap) {
@@ -427,7 +416,6 @@ public class LSDiffRunner {
 			file_ = file;
 			typeToFileMap_ = typeToFileMap;
 			entityLineMap_ = new HashMap<String, CodeSegment>();
-			methodNodeMap_ = new HashMap<String, MethodDeclaration>();
 		}
 
 		public FactGetter(ICompilationUnit file, Map<String, IJavaElement> typeToFileMap, Map<String, CodeSegment> entityLineMap) {
@@ -435,15 +423,6 @@ public class LSDiffRunner {
 			file_ = file;
 			typeToFileMap_ = typeToFileMap;
 			entityLineMap_ = entityLineMap;
-			methodNodeMap_ = new HashMap<String, MethodDeclaration>();
-		}
-
-		public FactGetter(ICompilationUnit file, Map<String, IJavaElement> typeToFileMap, Map<String, CodeSegment> entityLineMap, Map<String, MethodDeclaration> methodNodeMap) {
-			super();
-			file_ = file;
-			typeToFileMap_ = typeToFileMap;
-			entityLineMap_ = entityLineMap;
-			methodNodeMap_ = methodNodeMap;
 		}
 		
 		@Override
@@ -464,7 +443,6 @@ public class LSDiffRunner {
 		        ast.accept(acvisitor);
 		        typeToFileMap_.putAll(acvisitor.getTypeToFileMap());
 		        entityLineMap_.putAll(acvisitor.getEntityLineMap());
-		        methodNodeMap_.putAll(acvisitor.getMethodNodeMap());
 		        
 		        return acvisitor.facts;
 	        } catch (Exception e){

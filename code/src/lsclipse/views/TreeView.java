@@ -453,9 +453,7 @@ public class TreeView extends ViewPart {
 				
 				// Retrieving code lines and write to CSV
 				pbdiag.setMessage("Retrieving code lines...\n");
-				CodeLineRetriever lineRetriever = new CodeLineRetriever(LSDiffRunner.getOldEntityLineMap(), LSDiffRunner.getNewEntityLineMap(),
-						LSDiffRunner.getOldMethodNodeMap(), LSDiffRunner.getNewMethodNodeMap()
-						);
+				CodeLineRetriever lineRetriever = new CodeLineRetriever(LSDiffRunner.getOldEntityLineMap(), LSDiffRunner.getNewEntityLineMap());
 				Vector<String> lines = new Vector<String>();
 				ExecutorService execService = Executors.newFixedThreadPool(NUM_THREADS);
 				java.util.List<Future<Vector<String>>> futures = new java.util.LinkedList<Future<Vector<String>>>();
