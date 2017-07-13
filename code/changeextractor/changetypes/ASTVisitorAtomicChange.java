@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -205,6 +206,10 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		Expression expression = node.getExpression();
 		ITypeBinding type = node.getType().resolveBinding();
 		IMethodBinding mtb = mtbStack.peek();
+		
+		if (type == null)
+			return true;
+		
 		String exprStr = expression.toString();
 		String typeStr = getQualifiedName(type);
 		String methodStr = getQualifiedName(mtb);
@@ -231,11 +236,15 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		bodyStr = edit_str(bodyStr);
 		StringBuilder catchClauses = new StringBuilder();
 		for (Object o : node.catchClauses()) {
+			CatchClause c = (CatchClause) o;
+			ITypeBinding cBinding = c.getException().getType()
+					.resolveBinding();
+			if (cBinding == null)
+				continue;
+			
 			if (catchClauses.length() > 0)
 				catchClauses.append(",");
-			CatchClause c = (CatchClause) o;
-			catchClauses.append(getQualifiedName(c.getException().getType()
-					.resolveBinding()));
+			catchClauses.append(getQualifiedName(cBinding));
 			catchClauses.append(":");
 			if (c.getBody() != null)
 				catchClauses.append(edit_str(c.getBody().toString()));
@@ -594,6 +603,11 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 
 		IMethodBinding mtb = node.resolveBinding();
 		mtbStack.push(mtb);
+		
+		// Not usable
+		if (mtb == null)
+			return false;
+		
 		String nodeStr = node.toString();
 
 		// TODO(kprete): default is actually package private
@@ -680,11 +694,11 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		}
 
 		try {
-			List<Name> thrownTypes = node.thrownExceptions();
-			for (Name n : thrownTypes) {
+			List<Type> thrownTypes = node.thrownExceptionTypes();
+			for (Type n : thrownTypes) {
 				facts.add(Fact.makeThrownExceptionFact(getQualifiedName(mtb),
-						getQualifiedName(n.resolveTypeBinding())));
-				entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb), getQualifiedName(n.resolveTypeBinding())),
+						getQualifiedName(n.resolveBinding())));
+				entityLineMap_.put(getEntityMapKey(getQualifiedName(mtb), getQualifiedName(n.resolveBinding())),
 						CodeSegment.extract(node, Fact.FactTypes.THROWN));
 			}
 		} catch (Exception e) {
@@ -766,8 +780,9 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 			try {
 				return visitName(node.resolveBinding(), mtbStack.peek(), node);
 			} catch (Exception e) {
-				System.err.println("Cannot resolve simple name \""
-						+ node.getFullyQualifiedName().toString() + "\"");
+				if (node.resolveBinding() != null)
+					System.err.println("Cannot resolve simple name \""
+							+ node.getFullyQualifiedName().toString() + "\"");
 				return false;
 			}
 		}
@@ -782,7 +797,8 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 				return true;
 			}
 			try {
-				return visitName(node.resolveBinding(), mtbStack.peek(), node);
+				if (node.resolveBinding() != null)
+					return visitName(node.resolveBinding(), mtbStack.peek(), node);
 			} catch (Exception e) {
 				System.err.println("Cannot resolve qualified name \""
 						+ node.getFullyQualifiedName().toString() + "\"");
@@ -847,6 +863,9 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 
 		if (mtbStack.isEmpty()) // not part of a method
 			return true;
+		
+		if (mmtb == null)
+			return true;
 
 		// make field access fact
 		try {
@@ -888,6 +907,9 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 
 		if (mtbStack.isEmpty()) // not part of a method
 			return true;
+		
+		if (mmtb == null)
+			return true;
 
 		// make field access fact
 		try {
@@ -906,6 +928,9 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 		IMethodBinding mmtb = node.resolveConstructorBinding();
 
 		if (mtbStack.isEmpty()) // not part of a method
+			return true;
+		
+		if (mmtb == null)
 			return true;
 
 		// make field access fact
@@ -971,12 +996,15 @@ public class ASTVisitorAtomicChange extends ASTVisitor {
 				String methodName = getQualifiedName(mtbStack.peek()),
 						typeName = getQualifiedName(vds.getType().resolveBinding()),
 						identifier = vdf.getName().getIdentifier(),
-						expression = vdf.getInitializer().toString();
+						expression;
+				Expression exp = vdf.getInitializer();
+				expression = exp == null ? "" : exp.toString();
 				facts.add(Fact.makeLocalVarFact(methodName, typeName, identifier, expression));
 				entityLineMap_.put(getEntityMapKey(methodName, typeName, identifier, expression),
 						CodeSegment.extract(vdf));
 			} catch (Exception e) {
-				System.err.println("Cannot resolve variable declaration \""
+				if (vds.getType() != null && vds.getType().resolveBinding() != null)
+					System.err.println("Cannot resolve variable declaration \""
 						+ vdf.getName().toString() + "\"");
 			}
 		}
