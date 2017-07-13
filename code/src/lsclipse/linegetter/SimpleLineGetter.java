@@ -11,7 +11,7 @@ public class SimpleLineGetter implements LineGetter {
 		return "Default";
 	}
 	
-	public List<CodeSegment> retrieveCode(CodeLineRetriever retriever, List<String> dependents) {
+	public List<CodeSegment> retrieveCode(CodeLineRetriever retriever, String params, List<String> dependents) {
 		List<CodeSegment> segments = new ArrayList<CodeSegment>();
 		for (String statement : dependents) {
 			List<CodeSegment> segment = retriever.findCode(statement);

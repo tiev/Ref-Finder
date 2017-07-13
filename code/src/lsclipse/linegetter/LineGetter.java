@@ -8,5 +8,5 @@ import changetypes.CodeSegment;
 public interface LineGetter {
 	public abstract String getName();
 	
-	public abstract List<CodeSegment> retrieveCode(CodeLineRetriever retriever, List<String> dependents);
+	public abstract List<CodeSegment> retrieveCode(CodeLineRetriever retriever, String params, List<String> dependents);
 }

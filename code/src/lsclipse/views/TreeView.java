@@ -756,7 +756,7 @@ public class TreeView extends ViewPart {
 			Vector<String> lines = new Vector<String>();
 			String refName = node.getName();
 			java.util.List<CodeSegment> segments = LineGetterFactory.returnLineGetterByName(refName)
-					.retrieveCode(retriever, node.getDependents());
+					.retrieveCode(retriever, node.params, node.getDependents());
 			for (CodeSegment segment : segments) {
 				if (segment == null)
 					continue;

@@ -74,6 +74,8 @@ public class RenameMethod implements Rule {
 
 		if (m2Body_str.length() > 1
 				&& CodeCompare.compare(m1Body_str, m2Body_str)) {
+			// Considered for more precision
+//				&& CodeCompare.almost(m1Body_str, m2Body_str)) {
 
 			String writeTo = getName() + "(\"" + rs.getString(M1_FULL_NAME)
 					+ "\",\"" + rs.getString(M2_FULL_NAME) + "\",\""

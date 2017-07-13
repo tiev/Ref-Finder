@@ -16,7 +16,7 @@ public class ExtractSuperclass implements LineGetter {
 	}
 
 	@Override
-	public List<CodeSegment> retrieveCode(CodeLineRetriever retriever, List<String> dependents) {
+	public List<CodeSegment> retrieveCode(CodeLineRetriever retriever, String params, List<String> dependents) {
 		List<CodeSegment> segments = new ArrayList<CodeSegment>();
 		List<CodeSegment> segment;
 		Pattern patt = Pattern.compile("^added_subtype\\((.*)\\)$");

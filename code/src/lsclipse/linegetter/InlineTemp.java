@@ -6,44 +6,44 @@ import java.util.List;
 import changetypes.CodeLineRetriever;
 import changetypes.CodeSegment;
 
-public class IntroduceExplainingVariable implements LineGetter {
+public class InlineTemp implements LineGetter {
 
 	@Override
 	public String getName() {
-		return "Introduce explaining variable";
+		return "Inline temp";
 	}
 
 	@Override
 	public List<CodeSegment> retrieveCode(CodeLineRetriever retriever, String params, List<String> dependents) {
 		List<CodeSegment> segments = new ArrayList<CodeSegment>();
 
-		String addVarStr, deletedMethodName, addedMethodName;
-		addVarStr = deletedMethodName = addedMethodName = "";
+		String varStr, addedMethodName, deletedMethodName;
+		varStr = addedMethodName = deletedMethodName = "";
 		
 		for (String statement : dependents) {
-			if (statement.matches("^added_localvar.*")) {
+			if (statement.matches("^deleted_localvar.*")) {
 				List<CodeSegment> segment = retriever.findCode(statement);
 				if (segment != null)
 					segments.addAll(segment);
-				addVarStr = statement;
-			}
-			if (statement.matches("^deleted_methodbody.*")) {
-				deletedMethodName = retriever.getParamIn(statement, 0);
+				varStr = statement;
 			}
 			if (statement.matches("^added_methodbody.*")) {
 				addedMethodName = retriever.getParamIn(statement, 0);
 			}
+			if (statement.matches("^deleted_methodbody.*")) {
+				deletedMethodName = retriever.getParamIn(statement, 0);
+			}
 		}
 		
-		if (!deletedMethodName.isEmpty()) {
-			String expression = retriever.getParamIn(addVarStr, 3);
-			List<CodeSegment> segment = retriever.findCodeInOldMethod(expression, deletedMethodName);
+		if (!addedMethodName.isEmpty()) {
+			String expression = retriever.getParamIn(varStr, 3);
+			List<CodeSegment> segment = retriever.findCodeInNewMethod(expression, addedMethodName);
 			if (segment != null)
 				segments.addAll(segment);
 		}
-		if (!addedMethodName.isEmpty()) {
-			String varStr = retriever.getParamIn(addVarStr, 2);
-			List<CodeSegment> segment = retriever.findCodeInNewMethod(varStr, addedMethodName);
+		if (!deletedMethodName.isEmpty()) {
+			String identifier = retriever.getParamIn(varStr, 2);
+			List<CodeSegment> segment = retriever.findCodeInOldMethod(identifier, deletedMethodName);
 			if (segment != null)
 				segments.addAll(segment);
 		}

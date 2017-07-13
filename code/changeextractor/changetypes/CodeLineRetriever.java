@@ -297,6 +297,30 @@ public class CodeLineRetriever {
 		}
 		return "";
 	}
+	
+	public String getParamIn(String statement, int index) {
+		return getParamAt(getParamStr(statement), index);
+	}
+	
+	public List<CodeSegment> findCodeOldMethodName(String methodName) {
+		MethodDeclaration md = oldMethodMap_.get(methodName);
+		if (md != null) {
+			List<CodeSegment> ret = new ArrayList<CodeSegment>();
+			ret.add(CodeSegment.extract(md.getName()));
+			return ret;
+		}
+		return null;
+	}
+
+	public List<CodeSegment> findCodeNewMethodName(String methodName) {
+		MethodDeclaration md = newMethodMap_.get(methodName);
+		if (md != null) {
+			List<CodeSegment> ret = new ArrayList<CodeSegment>();
+			ret.add(CodeSegment.extract(md.getName()));
+			return ret;
+		}
+		return null;
+	}
 
 	public List<CodeSegment> findCodeInOldMethod(String expression, String methodName) {
 		MethodDeclaration md = oldMethodMap_.get(methodName);

@@ -6,11 +6,11 @@ import java.util.List;
 import changetypes.CodeLineRetriever;
 import changetypes.CodeSegment;
 
-public class MoveMethod implements LineGetter {
+public class RenameMethod implements LineGetter {
 
 	@Override
 	public String getName() {
-		return "Move method";
+		return "Rename method";
 	}
 
 	@Override
@@ -18,8 +18,15 @@ public class MoveMethod implements LineGetter {
 		List<CodeSegment> segments = new ArrayList<CodeSegment>();
 
 		for (String statement : dependents) {
-			if (statement.matches("^(deleted_method|added_method).*")) {
-				List<CodeSegment> segment = retriever.findCode(statement);
+			if (statement.matches("^deleted_method\\(.*")) {
+				List<CodeSegment> segment = retriever.findCodeOldMethodName(
+						retriever.getParamIn(statement, 0));
+				if (segment != null)
+					segments.addAll(segment);
+			}
+			if (statement.matches("^added_method\\(.*")) {
+				List<CodeSegment> segment = retriever.findCodeNewMethodName(
+						retriever.getParamIn(statement, 0));
 				if (segment != null)
 					segments.addAll(segment);
 			}

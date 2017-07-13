@@ -46,6 +46,18 @@ public class CodeCompare {
 
 		return false;
 	}
+	
+	// Make sure the longest common string is at least DIFFERENCE_THRESHOLD of
+	// the longer code fragment
+	public static boolean almost(String left, String right) {
+		String longer = getLongerString(left, right);
+		String lcs = LCS.getLCS(left, right);
+		double similarity = (double) lcs.length() / (double) longer.length();
+		if (similarity >= DIFFERNCE_THRESHOLD)
+			return true;
+		
+		return false;
+	}
 
 	private static String getShorterString(String left, String right) {
 		if (left.length() < right.length())

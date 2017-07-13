@@ -17,18 +17,17 @@ public class LineGetterFactory {
 			new ExtractMethod(),
 			// + Form template method
 			new InlineMethod(),
-			// + Inline temp <!> affect whole method body
-			// + Introduce assertion <!> affect whole method body
-			// + Introduce explaining variable <!> affect whole method body
+			new InlineTemp(),
+			new IntroduceAssertion(),
 			new IntroduceExplainingVariable(),
 			// + Introduce null object
 			// + Introduce parameter object
 			new MoveMethod(),
 			// + Parameterize method
 			// + Preserve whole object
-			// + Remove assignment to parameters <!> affect whole method body
+			new RemoveAssignmentToParameters(),
 			// + Remove control flag
-			// + Rename method <!> affect whole method body
+			new RenameMethod(),
 			// + Replace array with object
 			new ReplaceConditionalWithPolymorphism(),
 			// + Replace data with object

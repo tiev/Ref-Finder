@@ -38,6 +38,13 @@ public class CodeSegment {
 		public int getEnd() {
 			return last_;
 		}
+		@Override
+		public boolean equals(Object o) {
+			LineSegment other = (LineSegment) o;
+			if (first_ == other.first_ && last_ == other.last_)
+				return true;
+			return false;
+		}
 	}
 	
 	private List<LineSegment> lines = new ArrayList<LineSegment>();
@@ -57,6 +64,24 @@ public class CodeSegment {
 	
 	public String toString() {
 		return lines.toString();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		CodeSegment other = (CodeSegment) o;
+		if (other == null) return false;
+		
+		String thisFile, otherFile;
+		thisFile = otherFile = "";
+		if (file_ != null)
+			thisFile = file_.getResource().getLocation().toOSString();
+		if (other.file_ != null)
+			otherFile = other.file_.getResource().getLocation().toOSString();
+		if (thisFile.equals(otherFile)
+				&& lines.containsAll(other.lines)
+				&& other.lines.containsAll(lines))
+			return true;
+		return false;
 	}
 	
 	private static CodeSegment extractNode(ASTNode node) {
