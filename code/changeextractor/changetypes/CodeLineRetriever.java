@@ -151,7 +151,7 @@ public class CodeLineRetriever {
 				break;
 			case "parameter":
 				ret.add(map.get(String.join(ASTVisitorAtomicChange.PARAM_SEPARATOR, getParamAt(paramStr, 0),
-						getParamAt(paramStr, 1))));
+						getParamAt(paramStr, 2))));
 				break;
 			case "inheritedfield":
 			case "inheritedmethod":
