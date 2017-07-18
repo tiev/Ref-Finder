@@ -26,6 +26,7 @@ import tyRuBa.util.ElementSource;
 import java.net.URL;
 import java.net.MalformedURLException;
 
+@SuppressWarnings({"rawtypes","unchecked","deprecation","unused"})
 public class TyRuBaParser implements TyRuBaParserConstants {
 
         private PrintStream outputStream;
@@ -73,7 +74,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
 		The results of these queries will be reported to the standard
 		error device. */
 
-        public static void parse(QueryEngine rules,String fileName,PrintStream os)
+		public static void parse(QueryEngine rules,String fileName,PrintStream os)
         throws ParseException, IOException, TypeModeError {
                 parse(rules,new File(fileName).toURL(),os);
         }
@@ -1858,7 +1859,8 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     throw generateParseException();
   }
 
-  static private final class LookaheadSuccess extends java.lang.Error { }
+  @SuppressWarnings("serial")
+static private final class LookaheadSuccess extends java.lang.Error { }
   final private LookaheadSuccess jj_ls = new LookaheadSuccess();
   final private boolean jj_scan_token(int kind) {
     if (jj_scanpos == jj_lastpos) {

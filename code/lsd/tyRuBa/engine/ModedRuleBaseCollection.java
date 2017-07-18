@@ -36,6 +36,7 @@ import tyRuBa.modes.TypeModeError;
  * the others by its predicate mode
  */
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class ModedRuleBaseCollection {
 	
 	private QueryEngine engine;

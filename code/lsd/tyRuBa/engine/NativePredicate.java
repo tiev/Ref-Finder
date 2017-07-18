@@ -49,6 +49,7 @@ import tyRuBa.modes.TypeModeError;
  * into a Rulebase since they should have been "convertedToMode" into Implementations
  * before insertion.
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class NativePredicate extends RBComponent {
 
 	private PredInfo predinfo;
@@ -382,6 +383,7 @@ public class NativePredicate extends RBComponent {
 	public static void defineTypeTest(ModedRuleBaseIndex rb, PredicateIdentifier id, final TypeConstructor t)
 	throws TypeModeError {
 		Assert.assertEquals(1,id.getArity());
+		@SuppressWarnings("unused")
 		String javaName = t.getName();
 		NativePredicate type_test = new NativePredicate(id.getName(), Factory.makeAtomicType(t));
 		

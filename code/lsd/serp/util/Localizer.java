@@ -37,6 +37,7 @@ import java.util.*;
  *
  *	@author		Abe White
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class Localizer
 {
 	// static cache of package+loc name to resource bundle mappings

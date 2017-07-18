@@ -30,6 +30,7 @@ import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RBUniqueQuantifier;
 import tyRuBa.engine.RBVariable;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class InstantiateVisitor extends SubstituteOrInstantiateVisitor {
 
 	public InstantiateVisitor(Frame frame) {

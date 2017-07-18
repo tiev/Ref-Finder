@@ -31,6 +31,7 @@ import tyRuBa.engine.RBTerm;
 /**
  * @author riecken
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class JavaConstructorType extends ConstructorType {
 	
 	Class javaClass;

@@ -28,6 +28,7 @@ import tyRuBa.engine.RBTerm;
 /**
  * @author riecken
  */
+@SuppressWarnings({"rawtypes"})
 public abstract class ConstructorType {
     public abstract FunctorIdentifier getFunctorId();
 
@@ -37,7 +38,7 @@ public abstract class ConstructorType {
 
     public abstract RBTerm apply(RBTerm tuple);
 
-    public abstract RBTerm apply(ArrayList terms);
+	public abstract RBTerm apply(ArrayList terms);
 
     public abstract Type apply(Type argType) throws TypeModeError;
 

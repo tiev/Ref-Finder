@@ -29,6 +29,7 @@ import tyRuBa.modes.PredInfoProvider;
 import tyRuBa.modes.TypeEnv;
 import tyRuBa.modes.TypeModeError;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class RBNotFilter extends RBExpression {
 
 	private RBExpression negated_q;

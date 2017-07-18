@@ -5,7 +5,6 @@ import java.util.List;
 
 import changetypes.CodeLineRetriever;
 import changetypes.CodeSegment;
-import changetypes.CodeSegment.LineSegment;
 
 public class RemoveAssignmentToParameters implements LineGetter {
 

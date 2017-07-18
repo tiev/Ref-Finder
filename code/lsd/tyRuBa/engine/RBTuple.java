@@ -30,6 +30,7 @@ import tyRuBa.modes.TypeModeError;
 import tyRuBa.util.ObjectTuple;
 import tyRuBa.util.TwoLevelKey;
 
+@SuppressWarnings({"rawtypes","unchecked","serial"})
 public class RBTuple extends RBTerm implements TwoLevelKey {
 
 	RBTerm[] subterms;

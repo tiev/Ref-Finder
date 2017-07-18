@@ -15,15 +15,15 @@
 *    You should have received a copy of the GNU General Public License
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package lsd.rule;
+package rule;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class LSDLiteral
 {
   private boolean nonNegated;
@@ -39,7 +39,6 @@ public class LSDLiteral
       this.predicate = null;
       this.bindings = null; return;
     }
-    ArrayList<LSDBinding> ALBindings;
     ArrayList<LSDBinding> ALBindings;
     if ((bindings instanceof ArrayList)) {
       ALBindings = (ArrayList)bindings;
@@ -251,7 +250,7 @@ public class LSDLiteral
     char[] types = predicate.getTypes();
     for (int i = 0; i < types.length; i++)
     {
-      String fvName = types[i] + i;
+      String fvName = Character.toString((char)(types[i] + i));
       LSDVariable fv = new LSDVariable(fvName, types[i]);
       LSDBinding binding = new LSDBinding(fv);
       
@@ -414,7 +413,7 @@ public class LSDLiteral
       char[] types = pred.getTypes();
       for (Iterator localIterator2 = getBindings().iterator(); localIterator2.hasNext();)
       {
-        ((LSDBinding)localIterator2.next());
+        localIterator2.next();
         bindings.add(new LSDBinding(new LSDVariable("t" + i, types[i])));
         i++;
       }

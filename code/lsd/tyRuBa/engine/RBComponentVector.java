@@ -28,6 +28,7 @@ import tyRuBa.engine.compilation.Compiled;
  working with large collections of rules and facts.
 */
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class RBComponentVector {
 
 	public ArrayList contents;

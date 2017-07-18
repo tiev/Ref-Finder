@@ -321,7 +321,7 @@ public class LSDRule {
 		return output.toString() + (commandLine ? "." : "");
 	}
 	
-	private String canonicalRepresentation() {
+	public String canonicalRepresentation() {
 		return canonicalRepresentation(this.getLiterals(), new HashMap<LSDVariable, String>(), 0);
 	}
 	

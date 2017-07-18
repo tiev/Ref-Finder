@@ -27,6 +27,7 @@ import tyRuBa.parser.ParseException;
 import tyRuBa.tdbc.PreparedInsert;
 import tyRuBa.tdbc.TyrubaException;
 
+@SuppressWarnings({"rawtypes","serial"})
 public class TypeTest extends TyrubaTest implements Serializable {
 
 	public TypeTest(String arg0) {

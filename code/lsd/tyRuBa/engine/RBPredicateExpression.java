@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import junit.framework.Assert;
-
 import tyRuBa.engine.compilation.CompilationContext;
 import tyRuBa.engine.compilation.Compiled;
 import tyRuBa.engine.compilation.CompiledPredicateExpression;
@@ -35,9 +34,9 @@ import tyRuBa.modes.ModeCheckContext;
 import tyRuBa.modes.Multiplicity;
 import tyRuBa.modes.PredInfo;
 import tyRuBa.modes.PredInfoProvider;
+import tyRuBa.modes.TupleType;
 import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeEnv;
-import tyRuBa.modes.TupleType;
 import tyRuBa.modes.TypeModeError;
 
 /** 
@@ -46,6 +45,7 @@ import tyRuBa.modes.TypeModeError;
  * appropriate RBModedPredicateExpression.
  */
 
+@SuppressWarnings({"rawtypes"})
 public class RBPredicateExpression extends RBExpression {
 
 	protected PredicateIdentifier pred;

@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Vector;
 
+@SuppressWarnings({"rawtypes","unchecked","serial"})
 abstract public class Type implements Cloneable, Serializable {
 
 	public static final Type integer =

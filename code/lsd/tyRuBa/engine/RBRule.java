@@ -38,6 +38,7 @@ import tyRuBa.modes.TypeEnv;
 import tyRuBa.modes.TupleType;
 import tyRuBa.modes.TypeModeError;
 
+@SuppressWarnings({"rawtypes"})
 public class RBRule extends RBComponent implements Cloneable {
 
 	private PredicateIdentifier pred;

@@ -30,6 +30,7 @@ import tyRuBa.engine.RBExpression;
 import tyRuBa.engine.RBPredicateExpression;
 import tyRuBa.engine.RuleBase;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class Factory {
 
 	static public Bound makeBound() {

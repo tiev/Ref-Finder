@@ -36,6 +36,7 @@ import tyRuBa.util.ElementSource;
  * To change this generated comment go to 
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
+@SuppressWarnings({"rawtypes"})
 public class GeneralTest extends TyrubaTest {
 
 	/**

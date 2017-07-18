@@ -38,6 +38,7 @@ import tyRuBa.modes.TypeModeError;
  * rearranged. All RBModeSwitchExpressions should have been converted to
  * their switch case expressions before insertion.
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class RBModeSwitchExpression extends RBExpression {
 	
 	Vector modeCases = new Vector();

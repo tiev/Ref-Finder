@@ -90,6 +90,7 @@ public class TopologicalSort {
 	private Set<Node> graph;
 	private ArrayList<String> written_strs;
 
+	@SuppressWarnings("unused")
 	public TopologicalSort() {
 		graph = new HashSet<Node>();
 		written_strs = new ArrayList<String>();

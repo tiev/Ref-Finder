@@ -33,6 +33,7 @@ import tyRuBa.engine.RBTerm;
 /**
  * @author riecken
  */
+@SuppressWarnings({"rawtypes","serial"})
 public class RepAsJavaConstructorType extends ConstructorType implements Serializable {
 
     FunctorIdentifier functorId;

@@ -47,13 +47,15 @@ import tyRuBa.util.pager.Pager.ResourceId;
  * @category FactBase
  * @author riecken
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public final class Index {
 
     /**
      * Wraps a HashMap in a Pager resource. This wrapper also knows how to clean
      * itself.
      */
-    static class HashMapResource extends HashMap implements Pager.Resource {
+    @SuppressWarnings("serial")
+	static class HashMapResource extends HashMap implements Pager.Resource {
 
         private long myLastCleanTime = System.currentTimeMillis();
 
@@ -96,7 +98,8 @@ public final class Index {
     /**
      * Wraps a HashSet in a Pager resource.
      */
-    static class HashSetResource extends HashSet implements Pager.Resource {
+    @SuppressWarnings("serial")
+	static class HashSetResource extends HashSet implements Pager.Resource {
     }
 
     /** Locations in the mode that are free. */

@@ -37,6 +37,7 @@ import tyRuBa.modes.TypeEnv;
 import tyRuBa.modes.TupleType;
 import tyRuBa.modes.TypeModeError;
 
+@SuppressWarnings({"rawtypes"})
 public class RBFact extends RBComponent implements Cloneable {
 
 	private RBTuple args;

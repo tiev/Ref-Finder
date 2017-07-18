@@ -27,6 +27,7 @@ import java.util.*;
  *
  *	@author		Abe White
  */
+@SuppressWarnings({"rawtypes"})
 public interface RefCollection
 	extends Collection
 {

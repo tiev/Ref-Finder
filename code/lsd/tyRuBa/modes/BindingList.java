@@ -28,6 +28,7 @@ import java.util.ArrayList;
  * A BindingList is a list of BindingModes 
  */
 
+@SuppressWarnings("rawtypes")
 public class BindingList {
 	
 	private ArrayList parts;
@@ -36,6 +37,7 @@ public class BindingList {
 		parts = new ArrayList();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public BindingList(BindingMode bm) {
 		this();
 		parts.add(bm);
@@ -93,6 +95,7 @@ public class BindingList {
 	}
 
 	/** add newPart to the end of the list */
+	@SuppressWarnings("unchecked")
 	public void add(BindingMode newPart) {
 		parts.add(newPart);
 	}

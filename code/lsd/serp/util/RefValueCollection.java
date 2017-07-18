@@ -44,6 +44,7 @@ import java.util.*;
  *
  *	@author		Abe White
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 abstract class RefValueCollection
 	implements RefCollection
 {

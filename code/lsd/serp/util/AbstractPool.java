@@ -30,6 +30,7 @@ import java.util.*;
  *	
  *	@author		Abe White
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class AbstractPool
 	implements Pool
 {

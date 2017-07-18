@@ -39,6 +39,7 @@ import tyRuBa.modes.TypeModeError;
  * expression, then the bindings from the evaluation are compared to the
  * original bindings.
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class RBUniqueQuantifier extends RBExpression {
 
 	private RBExpression exp;

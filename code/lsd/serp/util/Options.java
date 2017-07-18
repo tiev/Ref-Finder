@@ -38,6 +38,7 @@ import java.util.*;
  *
  *	@author		Abe White
  */
+@SuppressWarnings({"rawtypes","unchecked","serial"})
 public class Options
 	extends TypedProperties
 {
@@ -286,7 +287,7 @@ public class Options
 		{
 			Object inner = null;
 			if (getter != null)
-				inner = getter.invoke (match[0], null);	
+				inner = getter.invoke (match[0], (Object[])null);	
 
 			// if no getter or current inner is null, try to create a new 
 			// inner instance and set it in object

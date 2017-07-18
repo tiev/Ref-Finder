@@ -15,22 +15,22 @@
 *    You should have received a copy of the GNU General Public License
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package lsd.facts;
+package facts;
 
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeSet;
+
 import lsd.io.LSDTyrubaFactReader;
 import lsd.rule.LSDBinding;
 import lsd.rule.LSDConst;
 import lsd.rule.LSDFact;
 import lsd.rule.LSDPredicate;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class LSdiffDistanceFactBase
 {
   public static void main(String[] args)
@@ -99,7 +99,8 @@ public class LSdiffDistanceFactBase
     return facts;
   }
   
-  private void printWorkingSetBinding(PrintStream p)
+  @SuppressWarnings("unused")
+private void printWorkingSetBinding(PrintStream p)
   {
     for (LSDBinding b : this.workingSetBinding)
     {
@@ -108,7 +109,8 @@ public class LSdiffDistanceFactBase
     }
   }
   
-  private void printWorking2KBFact(PrintStream p)
+  @SuppressWarnings("unused")
+private void printWorking2KBFact(PrintStream p)
   {
     for (LSDFact f : this.working2KB) {
       p.println(f);
@@ -129,15 +131,18 @@ public class LSdiffDistanceFactBase
     for (Iterator localIterator1 = this.hdelta.packageLevel.keySet().iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       String kind = (String)localIterator1.next();
-      localIterator2 = ((TreeSet)this.hdelta.packageLevel.get(kind)).iterator(); continue;LSDFact fact = (LSDFact)localIterator2.next();
+      localIterator2 = ((TreeSet)this.hdelta.packageLevel.get(kind)).iterator(); //continue;
+      LSDFact fact = (LSDFact)localIterator2.next();
       addBindingsFromFact(this.workingSetBinding, fact);
     }
     System.out.println("Initial Working Set Binding Size:\t" + 
       this.workingSetBinding.size());
-    for (localIterator1 = this.hdelta.typeLevel.keySet().iterator(); localIterator1.hasNext(); localIterator2.hasNext())
+    Iterator<String> localIterator1;
+	for (localIterator1 = this.hdelta.typeLevel.keySet().iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       String kind = (String)localIterator1.next();
-      localIterator2 = ((TreeSet)this.hdelta.typeLevel.get(kind)).iterator(); continue;LSDFact fact = (LSDFact)localIterator2.next();
+      localIterator2 = ((TreeSet)this.hdelta.typeLevel.get(kind)).iterator(); //continue;
+      LSDFact fact = (LSDFact)localIterator2.next();
       addBindingsFromFact(this.workingSetBinding, fact);
     }
     System.out.println("After Type Level: Working Set Binding Size:\t" + 
@@ -145,7 +150,8 @@ public class LSdiffDistanceFactBase
     for (localIterator1 = this.hdelta.methodLevel.keySet().iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       String kind = (String)localIterator1.next();
-      localIterator2 = ((TreeSet)this.hdelta.methodLevel.get(kind)).iterator(); continue;LSDFact fact = (LSDFact)localIterator2.next();
+      localIterator2 = ((TreeSet)this.hdelta.methodLevel.get(kind)).iterator(); //continue;
+      LSDFact fact = (LSDFact)localIterator2.next();
       addBindingsFromFact(this.workingSetBinding, fact);
     }
     System.out.println("After Method Level: Working Set Binding Size:\t" + 
@@ -153,7 +159,8 @@ public class LSdiffDistanceFactBase
     for (localIterator1 = this.hdelta.fieldLevel.keySet().iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       String kind = (String)localIterator1.next();
-      localIterator2 = ((TreeSet)this.hdelta.fieldLevel.get(kind)).iterator(); continue;LSDFact fact = (LSDFact)localIterator2.next();
+      localIterator2 = ((TreeSet)this.hdelta.fieldLevel.get(kind)).iterator(); //continue;
+      LSDFact fact = (LSDFact)localIterator2.next();
       addBindingsFromFact(this.workingSetBinding, fact);
     }
     System.out.println("After Field Level: Working Set Binding Size:\t" + 

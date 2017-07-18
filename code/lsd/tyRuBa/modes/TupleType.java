@@ -25,6 +25,7 @@ package tyRuBa.modes;
 import java.util.ArrayList;
 import java.util.Map;
 
+@SuppressWarnings({"rawtypes","unchecked","serial"})
 public class TupleType extends Type {
 
 	private ArrayList parts;

@@ -38,6 +38,7 @@ import java.lang.reflect.Array;
  * one silly mapping :P
  */
 
+@SuppressWarnings({"rawtypes","serial"})
 public class OneMap implements Map, Serializable {
 	private Object key = null;
 	private Object value = null;

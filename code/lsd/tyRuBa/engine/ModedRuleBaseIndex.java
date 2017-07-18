@@ -37,6 +37,7 @@ import tyRuBa.modes.TupleType;
 import tyRuBa.modes.TypeMapping;
 import tyRuBa.modes.TypeModeError;
 
+@SuppressWarnings({"rawtypes"})
 public abstract class ModedRuleBaseIndex implements PredInfoProvider {
 	
 	/** Create indexed rulebase for rb */

@@ -35,6 +35,7 @@ import tyRuBa.modes.TypeEnv;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.util.TwoLevelKey;
 
+@SuppressWarnings({"rawtypes","unchecked","serial"})
 public abstract class RBTerm implements Cloneable, Serializable, TwoLevelKey {
 
 	/** Turn a tyruba object into a Java Object.  The default implementation

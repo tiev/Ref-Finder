@@ -19,6 +19,7 @@ package tyRuBa.modes;
 
 import java.io.Serializable;
 
+@SuppressWarnings({"rawtypes","serial"})
 public class JavaTypeConstructor extends TypeConstructor implements Serializable {
 
 	private final Class javaClass;

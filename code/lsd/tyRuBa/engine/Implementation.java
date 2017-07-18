@@ -38,6 +38,7 @@ import tyRuBa.util.ElementSource;
  * how results are evaluated in a certain predicate mode 
  */
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class Implementation extends RBComponent {
 	
 	private PredicateMode mode;

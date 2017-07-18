@@ -47,6 +47,7 @@ import tyRuBa.util.SynchPolicy;
 import tyRuBa.util.SynchResource;
 import tyRuBa.util.pager.Pager;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class FrontEnd extends QueryEngine 
 implements SynchResource {
 	
@@ -539,7 +540,8 @@ implements SynchResource {
 		Map predMap = bucket.rulebase.localRuleBase.typeInfoBase.predicateMap;
 		Iterator it = predMap.values().iterator();
 		while (it.hasNext()) {
-		    PredInfo pinfo = (PredInfo) it.next();	    
+		    @SuppressWarnings("unused")
+			PredInfo pinfo = (PredInfo) it.next();	    
 		}
 	}
 

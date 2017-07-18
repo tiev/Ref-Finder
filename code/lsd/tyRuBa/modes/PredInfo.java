@@ -35,6 +35,7 @@ import tyRuBa.engine.factbase.hashtable.HashTableFactBase;
  * 
  * @category FactBase
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class PredInfo {
 
     private QueryEngine engine; 

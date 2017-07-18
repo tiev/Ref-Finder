@@ -24,6 +24,7 @@ import java.util.Iterator;
 
 import junit.framework.Assert;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class TestLogger {
 	
 	public static final boolean logging = false;

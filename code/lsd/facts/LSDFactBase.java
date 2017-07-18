@@ -15,10 +15,9 @@
 *    You should have received a copy of the GNU General Public License
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package lsd.facts;
+package facts;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,6 +35,7 @@ import metapackage.MetaInfo;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class LSDFactBase
 {
   public static final boolean deltaKB = true;
@@ -85,7 +85,7 @@ public class LSDFactBase
       return null;
     }
     ArrayList<LSDFact> relevantFacts = new ArrayList();
-    for (LSDFact f : (List)this.ruleMatches.get(rule)) {
+    for (LSDFact f : (List<LSDFact>)this.ruleMatches.get(rule)) {
       if ((this.factsDeltaKB.contains(f)) || (this.facts2KB.contains(f))) {
         relevantFacts.add(f);
       }
@@ -129,7 +129,8 @@ public class LSDFactBase
     {
       LSDFact fact = (LSDFact)localIterator1.next();
       line = fact.toString();
-      localIterator2 = typeNames.iterator(); continue;String str = (String)localIterator2.next();
+      localIterator2 = typeNames.iterator();// continue;
+      String str = (String)localIterator2.next();
       if (line.contains(str))
       {
         this.ruleChecker.loadFact(fact);
@@ -149,7 +150,8 @@ public class LSDFactBase
     {
       LSDFact fact = (LSDFact)localIterator1.next();
       line = fact.toString();
-      localIterator2 = typeNames.iterator(); continue;String str = (String)localIterator2.next();
+      localIterator2 = typeNames.iterator(); //continue;
+      String str = (String)localIterator2.next();
       if (line.contains(str))
       {
         this.ruleChecker.loadFact(fact);
@@ -190,8 +192,9 @@ public class LSDFactBase
       for (Iterator localIterator2 = resultingConclusions.iterator(); localIterator2.hasNext(); localIterator3.hasNext())
       {
         LSDRule matchedRule = (LSDRule)localIterator2.next();
-        localIterator3 = matchedRule.getLiterals().iterator(); continue;LSDLiteral generatedLiteral = (LSDLiteral)localIterator3.next();
-        if (!(generatedLiteral instanceof LSDFact))
+        localIterator3 = matchedRule.getLiterals().iterator(); //continue;
+        LSDLiteral generatedLiteral = (LSDLiteral)localIterator3.next();
+		if (!(generatedLiteral instanceof LSDFact))
         {
           System.out.println("Not a fact:" + generatedLiteral);
         }

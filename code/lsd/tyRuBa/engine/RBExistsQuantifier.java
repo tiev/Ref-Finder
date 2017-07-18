@@ -34,6 +34,7 @@ import tyRuBa.modes.TypeModeError;
  * except that the quantified variables are treated as brand new variables
  * inside the EXISTS expression. It is used mostly inside NOT expressions.
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class RBExistsQuantifier extends RBExpression {
 
 	private RBExpression exp;

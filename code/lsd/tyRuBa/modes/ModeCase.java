@@ -24,6 +24,7 @@ import java.util.Collection;
 
 import tyRuBa.engine.RBExpression;
 
+@SuppressWarnings({"rawtypes"})
 public class ModeCase {
 	private Collection boundVars;
 	private RBExpression exp;

@@ -41,14 +41,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import lsclipse.dialogs.ProgressBarDialog;
-import lsclipse.utils.StringCleaner;
-import lsd.facts.LSDRuleEnumerator;
-import lsd.rule.LSDFact;
-import lsd.rule.LSDPredicate;
-import lsd.rule.LSDRule;
-import metapackage.MetaInfo;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -63,8 +55,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import changetypes.ASTVisitorAtomicChange;
 import changetypes.AtomicChange;
@@ -73,6 +63,13 @@ import changetypes.ChangeSet;
 import changetypes.CodeSegment;
 import changetypes.Fact;
 import changetypes.FactBase;
+import lsclipse.dialogs.ProgressBarDialog;
+import lsclipse.utils.StringCleaner;
+import lsd.facts.LSDRuleEnumerator;
+import lsd.rule.LSDFact;
+import lsd.rule.LSDPredicate;
+import lsd.rule.LSDRule;
+import metapackage.MetaInfo;
 
 public class LSDiffRunner {
 	private static final int NUM_THREADS = 4;

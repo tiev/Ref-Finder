@@ -31,6 +31,7 @@ import tyRuBa.modes.PredInfoProvider;
 import tyRuBa.modes.TypeEnv;
 import tyRuBa.modes.TypeModeError;
 
+@SuppressWarnings({"rawtypes"})
 public class RBConjunction extends RBCompoundExpression {
 
 	public RBConjunction() {

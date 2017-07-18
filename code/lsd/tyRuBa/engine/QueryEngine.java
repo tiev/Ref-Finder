@@ -51,6 +51,7 @@ import tyRuBa.util.pager.Pager;
 /**
  * @author kdvolder
  */
+@SuppressWarnings({"rawtypes"})
 public abstract class QueryEngine {
 
 	/** Every query engine has a logger. The default logger does nothing. */

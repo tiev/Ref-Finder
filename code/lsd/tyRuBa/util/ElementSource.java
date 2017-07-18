@@ -157,6 +157,7 @@ public abstract class ElementSource {
 	}
 	
 	/** With elements from an ArrayList */
+	@SuppressWarnings("rawtypes")
 	public static ElementSource with(final ArrayList els) {
 		if (els.isEmpty())
 			return ElementSource.theEmpty;
@@ -165,6 +166,7 @@ public abstract class ElementSource {
 	}
 	
 	/** With an iterator **/
+	@SuppressWarnings("rawtypes")
 	public static ElementSource with(final Iterator it) {
 		return new ElementSource() {
 			

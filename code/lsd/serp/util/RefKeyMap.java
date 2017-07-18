@@ -53,6 +53,7 @@ import java.util.*;
  *
  *	@author		Abe White
  */
+@SuppressWarnings("rawtypes")
 abstract class RefKeyMap
 	implements RefMap
 {
@@ -96,6 +97,7 @@ abstract class RefKeyMap
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public boolean makeHard (Object key)
 	{
 		removeExpired ();
@@ -201,6 +203,7 @@ abstract class RefKeyMap
 	}
 
 
+	@SuppressWarnings("unchecked")
 	private Object putFilter (Object key, Object value)
 	{
 		if (key == null)
@@ -298,9 +301,10 @@ abstract class RefKeyMap
 	private static final class MapEntry
 		implements Map.Entry
 	{
-		Map.Entry _entry = null;
+		Map.Entry<?, Object> _entry = null;
 
 
+		@SuppressWarnings("unchecked")
 		public MapEntry (Map.Entry entry)
 		{
 			_entry = entry;

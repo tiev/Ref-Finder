@@ -22,6 +22,7 @@ import java.util.Vector;
 
 import tyRuBa.util.ElementSource;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class RBCompoundExpression extends RBExpression {
 
 	private ArrayList subexps;

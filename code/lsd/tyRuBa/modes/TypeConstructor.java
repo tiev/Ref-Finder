@@ -26,6 +26,7 @@ import tyRuBa.engine.MetaBase;
 /**
  * @author riecken
  */
+@SuppressWarnings({"rawtypes"})
 public abstract class TypeConstructor {
     
     public static TypeConstructor theAny = Factory.makeTypeConstructor(Object.class);

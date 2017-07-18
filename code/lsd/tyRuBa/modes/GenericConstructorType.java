@@ -36,6 +36,7 @@ import tyRuBa.engine.RBTuple;
  * out of there parts. It can be applied to a number of argument types and returns
  * the type of the corresponding compoundterm.  
  */
+@SuppressWarnings("serial")
 public class GenericConstructorType extends ConstructorType implements Serializable {
 
 	FunctorIdentifier identifier;
@@ -67,10 +68,12 @@ public class GenericConstructorType extends ConstructorType implements Serializa
 		return RBCompoundTerm.make(this,tuple);
 	}
 	
-    public RBTerm apply(ArrayList terms) {
+    @SuppressWarnings("rawtypes")
+	public RBTerm apply(ArrayList terms) {
         return apply(RBTuple.make(terms));
     }
     
+	@SuppressWarnings("rawtypes")
 	public Type apply(Type argType) throws TypeModeError {          
 		Map renamings = new HashMap();
 		Type iargs = args.clone(renamings);            

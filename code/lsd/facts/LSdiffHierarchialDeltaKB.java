@@ -15,7 +15,7 @@
 *    You should have received a copy of the GNU General Public License
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package lsd.facts;
+package facts;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,14 +24,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeSet;
+
 import lsd.io.LSDTyrubaFactReader;
 import lsd.rule.LSDBinding;
 import lsd.rule.LSDConst;
 import lsd.rule.LSDFact;
-import lsd.rule.LSDPredicate;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class LSdiffHierarchialDeltaKB
 {
   public String ADDED = "ADD";
@@ -173,7 +173,8 @@ public class LSdiffHierarchialDeltaKB
     for (Iterator localIterator1 = this.packageLevel.keySet().iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       String kind = (String)localIterator1.next();
-      localIterator2 = ((TreeSet)this.packageLevel.get(kind)).iterator(); continue;LSDFact packageF = (LSDFact)localIterator2.next();
+      localIterator2 = ((TreeSet)this.packageLevel.get(kind)).iterator(); //continue;
+      LSDFact packageF = (LSDFact)localIterator2.next();
       if (p != null) {
         p.println(packageF);
       }
@@ -194,10 +195,11 @@ public class LSdiffHierarchialDeltaKB
       }
     }
     Iterator localIterator2;
-    for (??? = this.typeLevel.keySet().iterator(); ???.hasNext(); localIterator2.hasNext())
+    for (Iterator<String> ite = this.typeLevel.keySet().iterator(); ite.hasNext(); localIterator2.hasNext())
     {
-      String kind = (String)???.next();
-      localIterator2 = ((TreeSet)this.typeLevel.get(kind)).iterator(); continue;LSDFact typeF = (LSDFact)localIterator2.next();
+      String kind = (String)ite.next();
+      localIterator2 = ((TreeSet)this.typeLevel.get(kind)).iterator(); //continue;
+      LSDFact typeF = (LSDFact)localIterator2.next();
       String containerPackage = ((LSDBinding)typeF.getBindings().get(2)).getGroundConst();
       if ((packageConstants == null) || (packageConstants.contains(containerPackage)))
       {
@@ -259,10 +261,11 @@ public class LSdiffHierarchialDeltaKB
       }
     }
     Iterator localIterator2;
-    for (??? = this.methodLevel.keySet().iterator(); ???.hasNext(); localIterator2.hasNext())
+    for (Iterator ite = this.methodLevel.keySet().iterator(); ite.hasNext(); localIterator2.hasNext())
     {
-      String kind = (String)???.next();
-      localIterator2 = ((TreeSet)this.methodLevel.get(kind)).iterator(); continue;LSDFact methodF = (LSDFact)localIterator2.next();
+      String kind = (String)ite.next();
+      localIterator2 = ((TreeSet)this.methodLevel.get(kind)).iterator(); //continue;
+      LSDFact methodF = (LSDFact)localIterator2.next();
       String containerType = ((LSDBinding)methodF.getBindings().get(2)).getGroundConst();
       if ((typeConstants == null) || (typeConstants.contains(containerType)))
       {
@@ -298,10 +301,11 @@ public class LSdiffHierarchialDeltaKB
       }
     }
     Iterator localIterator2;
-    for (??? = this.fieldLevel.keySet().iterator(); ???.hasNext(); localIterator2.hasNext())
+    for (Iterator ite = this.fieldLevel.keySet().iterator(); ite.hasNext(); localIterator2.hasNext())
     {
-      String kind = (String)???.next();
-      localIterator2 = ((TreeSet)this.fieldLevel.get(kind)).iterator(); continue;LSDFact fieldF = (LSDFact)localIterator2.next();
+      String kind = (String)ite.next();
+      localIterator2 = ((TreeSet)this.fieldLevel.get(kind)).iterator(); //continue;
+      LSDFact fieldF = (LSDFact)localIterator2.next();
       String containerType = ((LSDBinding)fieldF.getBindings().get(2))
         .getGroundConst();
       if ((typeConstants == null) || 
@@ -427,11 +431,11 @@ public class LSdiffHierarchialDeltaKB
     int counter = 0;
     for (LSDFact fact : this.originalDeltaKB)
     {
-      String predName = fact.getPredicate().getName();
+      String predName1 = fact.getPredicate().getName();
       counter++;
-      System.out.println(counter + ". \"" + predName + "\":" + fact);
-      if ((predName.equals("added_fieldoftype")) || 
-        (predName.equals("deleted_fieldoftype")))
+      System.out.println(counter + ". \"" + predName1 + "\":" + fact);
+      if ((predName1.equals("added_fieldoftype")) || 
+        (predName1.equals("deleted_fieldoftype")))
       {
         List<LSDBinding> bindings = fact.getBindings();
         LSDBinding firstBinding = (LSDBinding)bindings.get(0);
@@ -523,8 +527,8 @@ public class LSdiffHierarchialDeltaKB
       String predName = fact.getPredicate().getName();
       if (predName.endsWith("_typeintype"))
       {
-        List<LSDBinding> bindings = fact.getBindings();
-        LSDBinding secondBinding = (LSDBinding)bindings.get(1);
+        List<LSDBinding> binding = fact.getBindings();
+        LSDBinding secondBinding = (LSDBinding)binding.get(1);
         LSDFact mtype = LSDConst.createModifiedType(secondBinding.getGroundConst());
         if (!containsTheSameFact(addedType, deletedType, mtype)) {
           modifiedType.add(mtype);
@@ -532,8 +536,8 @@ public class LSdiffHierarchialDeltaKB
       }
       else if ((predName.endsWith("_extends")) || (predName.endsWith("_implements")))
       {
-        List<LSDBinding> bindings = fact.getBindings();
-        LSDBinding secondBinding = (LSDBinding)bindings.get(1);
+        List<LSDBinding> binding = fact.getBindings();
+        LSDBinding secondBinding = (LSDBinding)binding.get(1);
         LSDFact mtype = LSDConst.createModifiedType(secondBinding.getGroundConst());
         if (!containsTheSameFact(addedType, deletedType, mtype)) {
           modifiedType.add(mtype);
@@ -541,12 +545,12 @@ public class LSdiffHierarchialDeltaKB
       }
       else if (predName.endsWith("_inheritedmethod"))
       {
-        List<LSDBinding> bindings = fact.getBindings();
-        LSDBinding secondBinding = (LSDBinding)bindings.get(1);
+        List<LSDBinding> binding = fact.getBindings();
+        LSDBinding secondBinding = (LSDBinding)binding.get(1);
         LSDFact mtype = LSDConst.createModifiedType(secondBinding.getGroundConst());
         modifiedType.add(mtype);
         
-        LSDBinding thirdBinding = (LSDBinding)bindings.get(2);
+        LSDBinding thirdBinding = (LSDBinding)binding.get(2);
         LSDFact m2type = LSDConst.createModifiedType(thirdBinding.getGroundConst());
         if (!containsTheSameFact(addedType, deletedType, m2type)) {
           modifiedType.add(m2type);
@@ -567,31 +571,32 @@ public class LSdiffHierarchialDeltaKB
         }
       }
     }
-    for (??? = this.methodLevel.keySet().iterator(); ???.hasNext(); bindings.hasNext())
-    {
-      String kind = (String)???.next();
-      bindings = ((TreeSet)this.methodLevel.get(kind)).iterator(); continue;LSDFact fact = (LSDFact)bindings.next();
-      
-      List<LSDBinding> bindings = fact.getBindings();
-      LSDBinding thirdBinding = (LSDBinding)bindings.get(2);
-      LSDFact mtype = LSDConst.createModifiedType(thirdBinding.getGroundConst());
-      if (!containsTheSameFact(addedType, deletedType, mtype)) {
-        modifiedType.add(mtype);
-      }
-    }
-    for (??? = this.fieldLevel.keySet().iterator(); ???.hasNext(); bindings.hasNext())
-    {
-      String kind = (String)???.next();
-      bindings = ((TreeSet)this.fieldLevel.get(kind)).iterator(); continue;LSDFact fact = (LSDFact)bindings.next();
-      
-      List<LSDBinding> bindings = fact.getBindings();
-      LSDBinding thirdBinding = (LSDBinding)bindings.get(2);
-      LSDFact mtype = LSDConst.createModifiedType(thirdBinding
-        .getGroundConst());
-      if (!containsTheSameFact(addedType, deletedType, mtype)) {
-        modifiedType.add(mtype);
-      }
-    }
+    //FIXME(V) non-sense codes
+//    for (??? = this.methodLevel.keySet().iterator(); ???.hasNext(); bindings.hasNext())
+//    {
+//      String kind = (String)???.next();
+//      bindings = ((TreeSet)this.methodLevel.get(kind)).iterator(); continue;LSDFact fact = (LSDFact)bindings.next();
+//      
+//      List<LSDBinding> bindings = fact.getBindings();
+//      LSDBinding thirdBinding = (LSDBinding)bindings.get(2);
+//      LSDFact mtype = LSDConst.createModifiedType(thirdBinding.getGroundConst());
+//      if (!containsTheSameFact(addedType, deletedType, mtype)) {
+//        modifiedType.add(mtype);
+//      }
+//    }
+//    for (??? = this.fieldLevel.keySet().iterator(); ???.hasNext(); bindings.hasNext())
+//    {
+//      String kind = (String)???.next();
+//      bindings = ((TreeSet)this.fieldLevel.get(kind)).iterator(); continue;LSDFact fact = (LSDFact)bindings.next();
+//      
+//      List<LSDBinding> bindings = fact.getBindings();
+//      LSDBinding thirdBinding = (LSDBinding)bindings.get(2);
+//      LSDFact mtype = LSDConst.createModifiedType(thirdBinding
+//        .getGroundConst());
+//      if (!containsTheSameFact(addedType, deletedType, mtype)) {
+//        modifiedType.add(mtype);
+//      }
+//    }
     this.typeLevel.put(this.ADDED, addedType);
     this.typeLevel.put(this.DELETED, deletedType);
     this.typeLevel.put(this.MODIFIED, modifiedType);
@@ -612,10 +617,11 @@ public class LSdiffHierarchialDeltaKB
       }
     }
     Iterator localIterator2;
-    for (??? = this.typeLevel.keySet().iterator(); ???.hasNext(); localIterator2.hasNext())
+    for (Iterator ite = this.typeLevel.keySet().iterator(); ite.hasNext(); localIterator2.hasNext())
     {
-      String kind = (String)???.next();
-      localIterator2 = ((TreeSet)this.typeLevel.get(kind)).iterator(); continue;LSDFact fact = (LSDFact)localIterator2.next();
+      String kind = (String)ite.next();
+      localIterator2 = ((TreeSet)this.typeLevel.get(kind)).iterator(); //continue;
+      LSDFact fact = (LSDFact)localIterator2.next();
       
       List<LSDBinding> bindings = fact.getBindings();
       LSDBinding thirdBinding = (LSDBinding)bindings.get(2);
@@ -677,7 +683,8 @@ public class LSdiffHierarchialDeltaKB
     for (Iterator localIterator1 = this.packageLevel.keySet().iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       String kind = (String)localIterator1.next();
-      localIterator2 = ((TreeSet)this.packageLevel.get(kind)).iterator(); continue;LSDFact packageF = (LSDFact)localIterator2.next();
+      localIterator2 = ((TreeSet)this.packageLevel.get(kind)).iterator(); //continue;
+      LSDFact packageF = (LSDFact)localIterator2.next();
       if ((this.filter.packageLevel) && (p != null)) {
         p.println(packageF);
       }
@@ -694,7 +701,8 @@ public class LSdiffHierarchialDeltaKB
     for (Iterator localIterator1 = this.typeLevel.keySet().iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       String kind = (String)localIterator1.next();
-      localIterator2 = ((TreeSet)this.typeLevel.get(kind)).iterator(); continue;LSDFact typeF = (LSDFact)localIterator2.next();
+      localIterator2 = ((TreeSet)this.typeLevel.get(kind)).iterator(); //continue;
+      LSDFact typeF = (LSDFact)localIterator2.next();
       if (((LSDBinding)typeF.getBindings().get(2)).getGroundConst().equals(
         ((LSDBinding)packageF.getBindings().get(0)).getGroundConst()))
       {
@@ -715,7 +723,8 @@ public class LSdiffHierarchialDeltaKB
     for (Iterator localIterator1 = this.methodLevel.keySet().iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       String kind = (String)localIterator1.next();
-      localIterator2 = ((TreeSet)this.methodLevel.get(kind)).iterator(); continue;LSDFact methodF = (LSDFact)localIterator2.next();
+      localIterator2 = ((TreeSet)this.methodLevel.get(kind)).iterator(); //continue;
+      LSDFact methodF = (LSDFact)localIterator2.next();
       if (((LSDBinding)methodF.getBindings().get(2)).getGroundConst().equals(((LSDBinding)typeF.getBindings().get(0)).getGroundConst()))
       {
         if ((this.filter.methodLevel) && (p != null)) {
@@ -735,7 +744,8 @@ public class LSdiffHierarchialDeltaKB
     for (Iterator localIterator1 = this.fieldLevel.keySet().iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       String kind = (String)localIterator1.next();
-      localIterator2 = ((TreeSet)this.fieldLevel.get(kind)).iterator(); continue;LSDFact fieldF = (LSDFact)localIterator2.next();
+      localIterator2 = ((TreeSet)this.fieldLevel.get(kind)).iterator(); //continue;
+      LSDFact fieldF = (LSDFact)localIterator2.next();
       if (((LSDBinding)fieldF.getBindings().get(2)).getGroundConst().equals(((LSDBinding)typeF.getBindings().get(0)).getGroundConst()))
       {
         if ((this.filter.fieldLevel) && (p != null)) {
@@ -912,7 +922,8 @@ public class LSdiffHierarchialDeltaKB
     for (Iterator localIterator1 = this.packageLevel.keySet().iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       String kind = (String)localIterator1.next();
-      localIterator2 = ((TreeSet)this.packageLevel.get(kind)).iterator(); continue;LSDFact packageF = (LSDFact)localIterator2.next();
+      localIterator2 = ((TreeSet)this.packageLevel.get(kind)).iterator(); //continue;
+      LSDFact packageF = (LSDFact)localIterator2.next();
       if ((this.filter.packageLevel) && (p != null)) {
         p.println(packageF);
       }

@@ -28,6 +28,7 @@ import java.util.Map;
  * A TVar is any unknown type.  Once the type of a TVar is known, the TVar is
  * treated like the type. 
  */
+@SuppressWarnings({"rawtypes","unchecked","serial"})
 public class TVar extends Type {
 	
 	private Type content;

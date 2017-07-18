@@ -20,6 +20,7 @@ package tyRuBa.modes;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings({"rawtypes","unchecked","serial"})
 public class CompositeType extends BoundaryType {
 
 	private TypeConstructor typeConst = null;

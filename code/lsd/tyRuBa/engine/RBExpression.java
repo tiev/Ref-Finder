@@ -36,6 +36,7 @@ import tyRuBa.modes.TypeEnv;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.tdbc.PreparedQuery;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class RBExpression implements Cloneable {
 
     private Mode mode = null;

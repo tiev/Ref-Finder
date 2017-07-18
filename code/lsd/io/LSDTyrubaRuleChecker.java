@@ -15,7 +15,7 @@
 *    You should have received a copy of the GNU General Public License
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package lsd.io;
+package io;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,10 +27,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lsd.rule.LSDBinding;
 import lsd.rule.LSDFact;
-import lsd.rule.LSDLiteral;
-import lsd.rule.LSDPredicate;
 import lsd.rule.LSDRule;
 import lsd.rule.LSDVariable;
 import metapackage.MetaInfo;
@@ -43,6 +42,7 @@ import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 import tyRuBa.util.ElementSource;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class LSDTyrubaRuleChecker
 {
   private FrontEnd frontend = null;
@@ -140,12 +140,12 @@ public class LSDTyrubaRuleChecker
           Set<String> exceptionMatchStrings = new HashSet();
           LinkedHashMap<LSDVariable, String> exception = new LinkedHashMap();
           LSDRule newRule = null;
-          for (RBVariable matchedVar : frame.keySet())
+          for (RBVariable matchedVar : (List<RBVariable>)frame.keySet())
           {
             RBTerm term = frame.get(matchedVar);
             String constant = "\"" + term.toString() + "\"";
             LSDVariable toReplace = null;
-            for (LSDVariable freeVar : new LinkedHashSet(freeVars)) {
+            for (LSDVariable freeVar : new LinkedHashSet<LSDVariable>(freeVars)) {
               if (freeVar != null) {
                 if (freeVar.toString().equals(matchedVar.toString()))
                 {
@@ -182,17 +182,12 @@ public class LSDTyrubaRuleChecker
       {
         e.printStackTrace();
       }
-      if (!returnConclusions) {
-        break label484;
-      }
     }
     catch (Exception e)
     {
       e.printStackTrace();
     }
-    return newSubstitutedRules;
-    label484:
-    return exceptions;
+    return returnConclusions ? newSubstitutedRules : exceptions;
   }
   
   public List<LSDFact> get2KBMatches(LSDRule rule)
@@ -202,6 +197,7 @@ public class LSDTyrubaRuleChecker
     ArrayList<LSDRule> newSubstitutedRules = new ArrayList();
     ArrayList<LSDVariable> freeVars = rule.getFreeVariables();
     RBVariable matchedVar;
+    List<LSDFact> foundFacts = new ArrayList();
     try
     {
       RBExpression exp = this.frontend.makeExpression(query);
@@ -221,7 +217,8 @@ public class LSDTyrubaRuleChecker
             RBTerm term = frame.get(matchedVar);
             String constant = "\"" + term.toString() + "\"";
             LSDVariable toReplace = null;
-            for (LSDVariable freeVar : new LinkedHashSet(freeVars)) {
+            for (Object fV : new LinkedHashSet(freeVars)) {
+            	LSDVariable freeVar = (LSDVariable) fV;
               if (freeVar != null) {
                 if (freeVar.toString().equals(matchedVar.toString())) {
                   toReplace = freeVar;
@@ -252,15 +249,15 @@ public class LSDTyrubaRuleChecker
     {
       e.printStackTrace();
     }
-    List<LSDFact> foundFacts;
-    for (e = newSubstitutedRules.iterator(); e.hasNext(); matchedVar.hasNext())
-    {
-      LSDRule r = (LSDRule)e.next();
-      matchedVar = r.getLiterals().iterator(); continue;LSDLiteral literal = (LSDLiteral)matchedVar.next();
-      if (((literal instanceof LSDFact)) && (literal.getPredicate().is2KBPredicate()) && (!foundFacts.contains((LSDFact)literal))) {
-        foundFacts.add((LSDFact)literal);
-      }
-    }
+    //FIXME(V) non-sense code
+//    for (e = newSubstitutedRules.iterator(); e.hasNext(); matchedVar.hasNext())
+//    {
+//      LSDRule r = (LSDRule)e.next();
+//      matchedVar = r.getLiterals().iterator(); continue;LSDLiteral literal = (LSDLiteral)matchedVar.next();
+//      if (((literal instanceof LSDFact)) && (literal.getPredicate().is2KBPredicate()) && (!foundFacts.contains((LSDFact)literal))) {
+//        foundFacts.add((LSDFact)literal);
+//      }
+//    }
     return foundFacts;
   }
   
@@ -285,7 +282,8 @@ public class LSDTyrubaRuleChecker
           RBTerm term = frame.get(matchedVar);
           String constant = "\"" + term.toString() + "\"";
           
-          localIterator2 = new LinkedHashSet(freeVars).iterator(); continue;LSDVariable freeVar = (LSDVariable)localIterator2.next();
+          localIterator2 = new LinkedHashSet(freeVars).iterator(); //continue;
+          LSDVariable freeVar = (LSDVariable)localIterator2.next();
           if (freeVar.toString().equals(matchedVar.toString())) {
             matchStrings.add(freeVar.toString() + constant);
           }
@@ -331,7 +329,7 @@ public class LSDTyrubaRuleChecker
   {
     assert (rule.getFreeVariables().contains(match));
     String query = rule.convertAllToAntecedents().toTyrubaQuery(false);
-    replacements = new LinkedHashSet();
+    LinkedHashSet replacements = new LinkedHashSet();
     try
     {
       RBExpression exp = this.frontend.makeExpression(query);
@@ -344,7 +342,8 @@ public class LSDTyrubaRuleChecker
         while (es.status() == 1)
         {
           Frame frame = (Frame)es.nextElement();
-          for (RBVariable matchedVar : frame.keySet()) {
+          for (Object mV : frame.keySet()) {
+        	  RBVariable matchedVar = (RBVariable) mV;
             if (matchedVar.toString().equals(match.toString()))
             {
               RBTerm term = frame.get(matchedVar);
@@ -364,6 +363,7 @@ public class LSDTyrubaRuleChecker
     {
       e.printStackTrace();
     }
+    return replacements;
   }
   
   public void shutdown()
@@ -382,7 +382,8 @@ public class LSDTyrubaRuleChecker
     {
       LSDFact fact = (LSDFact)localIterator1.next();
       line = fact.toString() + ".";
-      localIterator2 = typeNames.iterator(); continue;String str = (String)localIterator2.next();
+      localIterator2 = typeNames.iterator(); //continue;
+      String str = (String)localIterator2.next();
       if (line.contains(str)) {
         loadFact(LSDTyrubaFactReader.parseTyrubaFact(line));
       }

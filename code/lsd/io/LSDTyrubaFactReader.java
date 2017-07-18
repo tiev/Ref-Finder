@@ -15,18 +15,19 @@
 *    You should have received a copy of the GNU General Public License
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package lsd.io;
+package io;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+
 import lsd.rule.LSDFact;
 import lsd.rule.LSDPredicate;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class LSDTyrubaFactReader
 {
   private ArrayList<LSDFact> facts = null;

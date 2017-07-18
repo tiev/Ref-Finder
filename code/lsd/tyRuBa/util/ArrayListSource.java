@@ -23,8 +23,10 @@ public class ArrayListSource extends ElementSource {
 
 	int pos = 0;
 	int sz;
+	@SuppressWarnings("rawtypes")
 	ArrayList els;
 	
+	@SuppressWarnings("rawtypes")
 	public ArrayListSource(ArrayList els) {
 		this.els = els;
 		sz = els.size();

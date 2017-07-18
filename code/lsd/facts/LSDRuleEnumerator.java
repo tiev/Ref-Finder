@@ -15,7 +15,7 @@
 *    You should have received a copy of the GNU General Public License
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package lsd.facts;
+package facts;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -45,12 +45,12 @@ import lsd.rule.LSDInvalidTypeException;
 import lsd.rule.LSDLiteral;
 import lsd.rule.LSDPredicate;
 import lsd.rule.LSDRule;
-import lsd.rule.LSDRule.LSDRuleComparator;
 import lsd.rule.LSDVariable;
 import metapackage.MetaInfo;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class LSDRuleEnumerator
 {
   private LSDTyrubaRuleChecker ruleChecker;
@@ -78,11 +78,11 @@ public class LSDRuleEnumerator
     ArrayList<LSDPredicate> preds = new ArrayList();
     for (String s : predNames)
     {
-      LSDPredicate p = LSDPredicate.getPredicate(s);
-      if ((antedecedent) && (p.isAntecedentPredicate())) {
-        preds.add(p);
+      LSDPredicate p1 = LSDPredicate.getPredicate(s);
+      if ((antedecedent) && (p1.isAntecedentPredicate())) {
+        preds.add(p1);
       } else {
-        preds.add(p);
+        preds.add(p1);
       }
     }
     return preds;
@@ -298,7 +298,7 @@ public class LSDRuleEnumerator
     this.num2KBSize = this.fb.num2KBFactSize();
     this.numDeltaKBSize = this.fb.numDeltaKBFactSize();
     this.numWinnowDeltaKBSize = ((List)afterWinnowing).size();
-    for (LSDFact fact : (List)afterWinnowing) {
+    for (LSDFact fact : (List<LSDFact>)afterWinnowing) {
       newRuleChecker.loadFact(fact);
     }
     return newRuleChecker;
@@ -313,16 +313,18 @@ public class LSDRuleEnumerator
     for (Iterator localIterator1 = this.read2kbFacts.iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       LSDFact fact = (LSDFact)localIterator1.next();
-      localIterator2 = cluster.iterator(); continue;String str = (String)localIterator2.next();
+      localIterator2 = cluster.iterator(); //continue;
+      String str = (String)localIterator2.next();
       if (fact.toString().contains(str)) {
         newRuleChecker.loadFact(fact);
       }
     }
     newRuleChecker.loadAdditionalDB(MetaInfo.includedDelta);
-    for (localIterator1 = this.readDeltaFacts.iterator(); localIterator1.hasNext(); localIterator2.hasNext())
+    for (Iterator<LSDFact> localIterator1 = this.readDeltaFacts.iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       LSDFact fact = (LSDFact)localIterator1.next();
-      localIterator2 = cluster.iterator(); continue;String str = (String)localIterator2.next();
+      localIterator2 = cluster.iterator(); //continue;
+      String str = (String)localIterator2.next();
       if (fact.toString().contains(str)) {
         newRuleChecker.loadFact(fact);
       }
@@ -347,7 +349,8 @@ public class LSDRuleEnumerator
     for (LSDVariable variable : variables) {
       varNames.add(variable.getName());
     }
-    for (int i = 0; varNames.contains("x" + i); i++) {}
+    int i = 0;
+    for (i = 0; varNames.contains("x" + i); i++) {}
     return new LSDVariable("x" + i, type);
   }
   
@@ -454,7 +457,8 @@ public class LSDRuleEnumerator
     
     List<LSDPredicate> predicates = getUniquePredicates(this.workingSet2KB, true);
     System.out.println("[extendUngroundRules: predicates to add]\t" + predicates);
-    for (Iterator localIterator1 = oldPartialRules.iterator(); localIterator1.hasNext(); ???.hasNext())
+    Iterator ite;
+	for (Iterator localIterator1 = oldPartialRules.iterator(); localIterator1.hasNext(); ite.hasNext())
     {
       LSDRule partialRule = (LSDRule)localIterator1.next();
       List<LSDLiteral> previousLiterals = partialRule.getLiterals();
@@ -464,7 +468,8 @@ public class LSDRuleEnumerator
       for (LSDVariable variable : partialRule.getFreeVariables()) {
         currentTypes.add(Character.valueOf(variable.getType()));
       }
-      ??? = predicates.iterator(); continue;LSDPredicate predicate = (LSDPredicate)???.next();
+      ite = predicates.iterator(); //continue;
+      LSDPredicate predicate = (LSDPredicate)ite.next();
       
       LSDPredicate antecedant = null;
       if ((partialRule.getAntecedents() != null) && 
@@ -578,7 +583,8 @@ public class LSDRuleEnumerator
           }
           result.println("#" + cnt++ + "\t(" + matches + "/" + (matches + exceptions) + ")");
           result.println(r);
-          localIterator2 = this.fb.getRelevantFacts(r).iterator(); continue;LSDFact pfact = (LSDFact)localIterator2.next();
+          localIterator2 = this.fb.getRelevantFacts(r).iterator(); //continue;
+          LSDFact pfact = (LSDFact)localIterator2.next();
           result.println("#P:\t" + pfact);
         }
       }
@@ -646,9 +652,10 @@ public class LSDRuleEnumerator
           this.fb.loadWinnowingRules(methodBodyLevelRules);
           break;
         default: 
-          if (!$assertionsDisabled) {
-            throw new AssertionError();
-          }
+            //FIXME(V) error with assertionsDisabled
+//          if (!$assertionsDisabled) {
+//            throw new AssertionError();
+//          }
           break;
         }
         this.fb.forceWinnowing();
@@ -704,7 +711,8 @@ public class LSDRuleEnumerator
         }
         System.err.println("#" + cnt++ + "\t(" + matches + "/" + (matches + exceptions) + ")");
         System.err.println(r);
-        localIterator2 = this.fb.getRelevantFacts(r).iterator(); continue;LSDFact pfact = (LSDFact)localIterator2.next();
+        localIterator2 = this.fb.getRelevantFacts(r).iterator(); //continue;
+        LSDFact pfact = (LSDFact)localIterator2.next();
         System.err.println("#P:\t" + pfact);
       }
     }
@@ -749,7 +757,8 @@ public class LSDRuleEnumerator
         }
         System.err.println("#" + cnt++ + "\t(" + matches + "/" + (matches + exceptions) + ")");
         System.err.println(r);
-        localIterator2 = this.fb.getRelevantFacts(r).iterator(); continue;LSDFact pfact = (LSDFact)localIterator2.next();
+        localIterator2 = this.fb.getRelevantFacts(r).iterator(); //continue;
+        LSDFact pfact = (LSDFact)localIterator2.next();
         System.err.println("#P:\t" + pfact);
       }
       Collection<LSDRule> selectedSubset = coverSet(rules, true, null);
@@ -821,22 +830,22 @@ public class LSDRuleEnumerator
         {
           Integer preFound = 
             (Integer)alreadyFoundExceptionCounts.get(bestRule);
-          int exBestRule;
+          int exBestRule = 0;
           if (preFound == null)
           {
-            int exBestRule = countExceptions(bestRule);
-            alreadyFoundExceptionCounts.put(bestRule, Integer.valueOf(exBestRule));
+            int exBestRule1 = countExceptions(bestRule);
+            alreadyFoundExceptionCounts.put(bestRule, Integer.valueOf(exBestRule1));
           }
           else
           {
             exBestRule = preFound.intValue();
           }
           preFound = (Integer)alreadyFoundExceptionCounts.get(bestRule);
-          int exRule;
+          int exRule = 0;
           if (preFound == null)
           {
-            int exRule = countExceptions(rule);
-            alreadyFoundExceptionCounts.put(rule, Integer.valueOf(exRule));
+            int exRule1 = countExceptions(rule);
+            alreadyFoundExceptionCounts.put(rule, Integer.valueOf(exRule1));
           }
           else
           {
@@ -905,7 +914,8 @@ public class LSDRuleEnumerator
     {
       char type = arrayOfChar[i];
       newBindingsList = new ArrayList();
-      for (Iterator localIterator1 = bindingsList.iterator(); localIterator1.hasNext(); ???.hasNext())
+      Iterator ite;
+	for (Iterator localIterator1 = bindingsList.iterator(); localIterator1.hasNext(); ite.hasNext())
       {
         List<LSDBinding> prevBindings = (List)localIterator1.next();
         
@@ -922,7 +932,8 @@ public class LSDRuleEnumerator
         }
         variableChoices.add(newFreeVariable(freeVariables, type));
         
-        ??? = variableChoices.iterator(); continue;LSDVariable nextVariable = (LSDVariable)???.next();
+        ite = variableChoices.iterator(); //continue;
+        LSDVariable nextVariable = (LSDVariable)ite.next();
         
         ArrayList<LSDBinding> newBindings = new ArrayList(
           prevBindings);
@@ -936,7 +947,7 @@ public class LSDRuleEnumerator
     {
       Object bindings = (List)i.next();
       boolean linked = false;
-      for (LSDBinding b : (List)bindings) {
+      for (LSDBinding b : (List<LSDBinding>)bindings) {
         if (ruleFreeVars.contains(b.getVariable()))
         {
           linked = true;
@@ -961,7 +972,8 @@ public class LSDRuleEnumerator
       if (!binding.isBound())
       {
         List<List<LSDBinding>> newBindingsList = new ArrayList();
-        for (localIterator2 = bindingsList.iterator(); localIterator2.hasNext(); ???.hasNext())
+        Iterator ite;
+		for (localIterator2 = bindingsList.iterator(); localIterator2.hasNext(); ite.hasNext())
         {
           List<LSDBinding> prevBindings = (List)localIterator2.next();
           
@@ -976,10 +988,10 @@ public class LSDRuleEnumerator
               variableChoices.add(v);
             }
           }
-          variableChoices.add(newFreeVariable(freeVariables, binding
-            .getType()));
+          variableChoices.add(newFreeVariable(freeVariables, binding.getType()));
           
-          ??? = variableChoices.iterator(); continue;LSDVariable nextVariable = (LSDVariable)???.next();
+          ite = variableChoices.iterator(); //continue;
+          LSDVariable nextVariable = (LSDVariable)ite.next();
           
           ArrayList<LSDBinding> newBindings = new ArrayList(
             prevBindings);
@@ -994,7 +1006,7 @@ public class LSDRuleEnumerator
     {
       Object bindings = (List)i.next();
       boolean linked = false;
-      for (LSDBinding b : (List)bindings) {
+      for (LSDBinding b : (List<LSDBinding>)bindings) {
         if (ruleFreeVars.contains(b.getVariable()))
         {
           linked = true;
@@ -1073,7 +1085,8 @@ public class LSDRuleEnumerator
       {
         LSDLiteral literal = (LSDLiteral)localIterator1.next();
         List<LSDBinding> bindingsList = literal.getBindings();
-        localIterator2 = bindingsList.iterator(); continue;LSDBinding binding = (LSDBinding)localIterator2.next();
+        localIterator2 = bindingsList.iterator(); //continue;
+        LSDBinding binding = (LSDBinding)localIterator2.next();
         if (binding.getGroundConst() != null) {
           return true;
         }
@@ -1091,7 +1104,7 @@ public class LSDRuleEnumerator
     
     public Grounding addGrounding(LSDVariable variable, String constant)
     {
-      Grounding newGrounding = new Grounding(LSDRuleEnumerator.this, this);
+      Grounding newGrounding = new Grounding(this);
       
       assert (this.remainingVariables.contains(variable)) : 
         ("Error: " + this.remainingVariables + " doesn't contain " + variable);
@@ -1154,10 +1167,10 @@ public class LSDRuleEnumerator
         output.write("\t    Except:");
         output.newLine();
         
-        ??? = this.fb.getExceptions(rule).iterator();
-        while (???.hasNext())
+        Iterator<Map<LSDVariable, String>> ite = this.fb.getExceptions(rule).iterator();
+        while (ite.hasNext())
         {
-          Map<LSDVariable, String> exception = (Map)???.next();
+          Map<LSDVariable, String> exception = (Map)ite.next();
           output.newLine();
           output.write("\t\t(");
           boolean first = true;
@@ -1185,7 +1198,8 @@ public class LSDRuleEnumerator
       for (Iterator localIterator2 = rule.getLiterals().iterator(); localIterator2.hasNext(); localIterator3.hasNext())
       {
         LSDLiteral literal = (LSDLiteral)localIterator2.next();
-        localIterator3 = literal.getBindings().iterator(); continue;LSDBinding bind = (LSDBinding)localIterator3.next();
+        localIterator3 = literal.getBindings().iterator(); //continue;
+        LSDBinding bind = (LSDBinding)localIterator3.next();
         int i = 0;
         if (bind.isBound()) {
           for (LSDFact delta : this.readDeltaFacts)
@@ -1212,7 +1226,7 @@ public class LSDRuleEnumerator
     for (int i = 0; i < temp.length; i++) {
       temp[i] = ((LSDRule)rules.get(i));
     }
-    void tmp49_46 = new LSDRule();tmp49_46.getClass();Arrays.sort(temp, new LSDRule.LSDRuleComparator(tmp49_46));
+    LSDRule tmp49_46 = new LSDRule();tmp49_46.getClass();Arrays.sort(temp, tmp49_46.new LSDRuleComparator());
     ArrayList<LSDRule> sortedList = new ArrayList();
     LSDRule[] arrayOfLSDRule1;
     int j = (arrayOfLSDRule1 = temp).length;
@@ -1294,7 +1308,8 @@ public class LSDRuleEnumerator
       {
         LSDPredicate newConsequentPred = (LSDPredicate)localIterator1.next();
         
-        localIterator2 = previouslyLearnedRules.iterator(); continue;LSDRule previousRule = (LSDRule)localIterator2.next();
+        localIterator2 = previouslyLearnedRules.iterator(); //continue;
+        LSDRule previousRule = (LSDRule)localIterator2.next();
         
         LSDRule previousAntecedents = previousRule.getAntecedents();
         

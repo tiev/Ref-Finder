@@ -32,6 +32,7 @@ import java.util.*;
  *
  *	@author		Abe White
  */
+@SuppressWarnings("rawtypes")
 public class MapSet
 	extends AbstractSet
 {
@@ -70,6 +71,7 @@ public class MapSet
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	public boolean add (Object obj)
 	{
 		if (_map.containsKey (obj))

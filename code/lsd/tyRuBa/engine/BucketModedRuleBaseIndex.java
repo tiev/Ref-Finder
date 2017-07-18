@@ -35,6 +35,7 @@ import tyRuBa.modes.TypeModeError;
  * is not declared locally index), then they are inserted into the global
  * rulebase index.
  */
+@SuppressWarnings({"rawtypes"})
 public class BucketModedRuleBaseIndex extends ModedRuleBaseIndex {
 
 	BasicModedRuleBaseIndex localRuleBase;
@@ -86,6 +87,7 @@ public class BucketModedRuleBaseIndex extends ModedRuleBaseIndex {
 		}
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public void addTypePredicate(TypeConstructor TypeConstructor, ArrayList subtypes) {
 		localRuleBase.addTypePredicate(TypeConstructor, subtypes);
 	}

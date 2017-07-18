@@ -27,6 +27,7 @@ import java.util.*;
  *
  *	@author		Abe White
  */
+@SuppressWarnings({ "rawtypes", "serial" })
 public class IdentityMap
 	extends HashMap
 {
@@ -97,6 +98,7 @@ public class IdentityMap
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public Object put (Object key, Object value)
 	{
 		return super.put (createKey (key), value);
@@ -201,6 +203,7 @@ public class IdentityMap
 		}
 
 
+		@SuppressWarnings("unchecked")
 		public Object setValue (Object value)
 		{
 			return _entry.setValue (value);
@@ -249,6 +252,7 @@ public class IdentityMap
 		}
 	
 	
+		@SuppressWarnings("unchecked")
 		public boolean add (Object o)
 		{
 			Map.Entry entry = (Map.Entry) o;

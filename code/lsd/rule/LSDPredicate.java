@@ -15,15 +15,15 @@
 *    You should have received a copy of the GNU General Public License
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package lsd.rule;
+package rule;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class LSDPredicate
 {
   public static int DELETED;
@@ -627,7 +627,6 @@ public class LSDPredicate
         arg0 = arg0.substring(1, arg0.lastIndexOf("\""));
       }
       String arg1 = arg0.substring(arg0.indexOf("%.") + 2);
-      String arg2;
       String arg2;
       if (arg0.indexOf("%") == 0) {
         arg2 = "null";

@@ -42,6 +42,7 @@ import tyRuBa.util.ElementSource;
  * @category FactBase
  * @author riecken
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class SimpleArrayListFactBase extends FactBase {
 
     /** All of the facts in this FactBase. */

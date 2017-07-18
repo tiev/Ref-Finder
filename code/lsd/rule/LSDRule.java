@@ -15,9 +15,8 @@
 *    You should have received a copy of the GNU General Public License
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package lsd.rule;
+package rule;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -30,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import lsd.io.LSDAlchemyRuleReader;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class LSDRule
 {
   private double score = 0.0D;
@@ -157,7 +157,8 @@ public class LSDRule
     for (Iterator localIterator1 = this.literals.iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       LSDLiteral l = (LSDLiteral)localIterator1.next();
-      localIterator2 = l.freeVars().iterator(); continue;LSDVariable v = (LSDVariable)localIterator2.next();
+      localIterator2 = l.freeVars().iterator(); //continue;
+      LSDVariable v = (LSDVariable)localIterator2.next();
       if (freeVarCount.get(v) == null) {
         freeVarCount.put(v, Integer.valueOf(1));
       } else {
@@ -186,10 +187,10 @@ public class LSDRule
   {
     LSDLiteral l;
     int i;
-    for (Iterator localIterator = this.literals.iterator(); localIterator.hasNext(); i < l.bindings.size())
+    for (Iterator localIterator = this.literals.iterator(); localIterator.hasNext(); i = l.bindings.size())
     {
       l = (LSDLiteral)localIterator.next();
-      i = 0; continue;
+      i = 0; //continue;
       LSDBinding temp = (LSDBinding)l.bindings.get(i);
       if (!temp.isBound()) {
         for (int j = i + 1; j < l.bindings.size(); j++) {
@@ -282,7 +283,8 @@ public class LSDRule
     for (Iterator localIterator1 = this.freeVars.iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       LSDVariable fv_i = (LSDVariable)localIterator1.next();
-      localIterator2 = this.freeVars.iterator(); continue;LSDVariable fv_j = (LSDVariable)localIterator2.next();
+      localIterator2 = this.freeVars.iterator(); //continue;
+      LSDVariable fv_j = (LSDVariable)localIterator2.next();
       if (fv_i.typeConflicts(fv_j)) {
         return false;
       }
@@ -339,7 +341,8 @@ public class LSDRule
     for (Iterator localIterator1 = this.literals.iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       LSDLiteral l = (LSDLiteral)localIterator1.next();
-      localIterator2 = l.freeVars().iterator(); continue;LSDVariable v = (LSDVariable)localIterator2.next();
+      localIterator2 = l.freeVars().iterator(); //continue;
+      LSDVariable v = (LSDVariable)localIterator2.next();
       if (freeVarCount.get(v) == null) {
         freeVarCount.put(v, Integer.valueOf(1));
       } else {
@@ -372,7 +375,7 @@ public class LSDRule
     for (int i = 0; i < literals.size(); i++)
     {
       LSDLiteral literal = (LSDLiteral)literals.get(i);
-      thisIndex = predicates.indexOf(literal.getPredicate());
+      int thisIndex = predicates.indexOf(literal.getPredicate());
       if ((thisIndex < firstPredicateIndex) && (thisIndex >= 0))
       {
         firstPredicateIndex = thisIndex;
@@ -385,7 +388,7 @@ public class LSDRule
       }
     }
     String repr = null;
-    for (int thisIndex = firstPredicateList.iterator(); thisIndex.hasNext();)
+    for (Iterator<Integer> thisIndex = firstPredicateList.iterator(); thisIndex.hasNext();)
     {
       int index = ((Integer)thisIndex.next()).intValue();
       
@@ -502,7 +505,9 @@ public class LSDRule
       assert (r.isValid());
       assert (r.addLiteral(quxx));
       System.out.println(r);
-      if ((!$assertionsDisabled) && (r.isValid())) {
+      //FIXME(V) error with assertionsDisabled
+//      if ((!$assertionsDisabled) && (r.isValid())) {
+      if (r.isValid()) {
         throw new AssertionError();
       }
     }
@@ -526,7 +531,8 @@ public class LSDRule
     {
       LSDLiteral literal = (LSDLiteral)localIterator1.next();
       List<LSDBinding> bindings = literal.getBindings();
-      localIterator2 = bindings.iterator(); continue;LSDBinding binding = (LSDBinding)localIterator2.next();
+      localIterator2 = bindings.iterator(); //continue;
+      LSDBinding binding = (LSDBinding)localIterator2.next();
       if (binding.isBound()) {
         res.add(binding.getGroundConst());
       }
@@ -552,7 +558,8 @@ public class LSDRule
     for (Iterator localIterator1 = this.literals.iterator(); localIterator1.hasNext(); localIterator2.hasNext())
     {
       LSDLiteral literal = (LSDLiteral)localIterator1.next();
-      localIterator2 = literal.getBindings().iterator(); continue;LSDBinding binding = (LSDBinding)localIterator2.next();
+      localIterator2 = literal.getBindings().iterator(); //continue;
+      LSDBinding binding = (LSDBinding)localIterator2.next();
       if (binding.getGroundConst() != null)
       {
         if ((binding.getGroundConst().startsWith("java")) && (!hasLanguageBinding)) {

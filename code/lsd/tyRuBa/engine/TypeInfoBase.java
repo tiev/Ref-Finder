@@ -34,6 +34,7 @@ import tyRuBa.modes.UserDefinedTypeConstructor;
 /** 
  * A TypeInfoBase is a collection of predicate and type information.
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class TypeInfoBase implements PredInfoProvider {
 
 	/** 

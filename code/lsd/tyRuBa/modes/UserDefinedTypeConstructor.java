@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import tyRuBa.engine.MetaBase;
 
+@SuppressWarnings({"rawtypes","serial"})
 public class UserDefinedTypeConstructor extends TypeConstructor implements Serializable {
 	
 	private String name;

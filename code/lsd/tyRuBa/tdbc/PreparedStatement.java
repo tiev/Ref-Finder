@@ -32,6 +32,7 @@ import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeEnv;
 import tyRuBa.modes.TypeModeError;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class PreparedStatement {
 
 	private TypeEnv      tEnv;

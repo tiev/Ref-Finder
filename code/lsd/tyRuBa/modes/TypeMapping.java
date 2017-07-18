@@ -26,6 +26,7 @@ import java.io.Serializable;
 /**
  * @author riecken
  */
+@SuppressWarnings({"rawtypes","serial"})
 public abstract class TypeMapping implements Serializable {
 
     private ConstructorType functor;

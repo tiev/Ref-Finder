@@ -37,6 +37,7 @@ import tyRuBa.tdbc.TyrubaException;
  * @author kdvolder
  * @codegroup metadata
  */
+@SuppressWarnings({"rawtypes","serial"})
 public class MetaBase {
 
 	private QueryEngine engine;

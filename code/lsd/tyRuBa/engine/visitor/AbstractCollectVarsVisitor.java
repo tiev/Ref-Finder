@@ -29,6 +29,7 @@ import tyRuBa.engine.RBQuoted;
 import tyRuBa.engine.RBTuple;
 import tyRuBa.modes.ModeCheckContext;
 
+@SuppressWarnings({"rawtypes"})
 public abstract class AbstractCollectVarsVisitor implements ExpressionVisitor, TermVisitor {
 
 	Collection vars;

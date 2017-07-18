@@ -29,6 +29,7 @@ import java.util.*;
  *	
  *	@author		Abe White
  */
+@SuppressWarnings({"rawtypes"})
 public class IdentityPool
 	extends AbstractPool
 {

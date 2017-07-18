@@ -26,6 +26,7 @@ import java.util.*;
  *
  *	@author		Abe White
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class Strings
 {
 	private static final Object[][] _codes = new Object[][] {

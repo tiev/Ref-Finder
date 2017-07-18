@@ -35,6 +35,7 @@ import tyRuBa.engine.RBVariable;
  * This visitor visits RBExpression and collects all variables that will
  * become bound after evaluation of the expression.
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class CollectVarsVisitor extends AbstractCollectVarsVisitor {
 
 	public CollectVarsVisitor(Collection vars) {

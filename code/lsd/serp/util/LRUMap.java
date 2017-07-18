@@ -32,6 +32,7 @@ import java.util.*;
  *
  *	@author		Abe White
  */
+@SuppressWarnings("rawtypes")
 public class LRUMap
 	implements SortedMap
 {
@@ -110,6 +111,7 @@ public class LRUMap
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public boolean equals (Object other)
 	{
 		if (other == this)
@@ -122,6 +124,7 @@ public class LRUMap
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public Object get (Object key)
 	{
 		Object order = _orders.remove (key);
@@ -150,6 +153,7 @@ public class LRUMap
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public Object put (Object key, Object value)
 	{
 		Object order = nextOrderKey (key);
@@ -259,6 +263,7 @@ public class LRUMap
 		}
 
 
+		@SuppressWarnings("unchecked")
 		public Object setValue (Object value)
 		{
 			return _valuesEntry.setValue (value);
@@ -396,7 +401,7 @@ public class LRUMap
 	
 		public Iterator iterator ()
 		{
-			final Iterator valuesItr = _values.entrySet ().iterator ();
+			final Iterator valuesItr = _values.entrySet().iterator();
 
 			return new Iterator ()
 			{

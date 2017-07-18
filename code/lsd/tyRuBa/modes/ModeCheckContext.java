@@ -34,6 +34,7 @@ import tyRuBa.engine.RuleBase;
  * during convertToMode 
  */
 
+@SuppressWarnings({"rawtypes"})
 public class ModeCheckContext implements Cloneable {
 
 	private BindingEnv bindings;

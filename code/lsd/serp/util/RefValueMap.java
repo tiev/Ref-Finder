@@ -47,6 +47,7 @@ import java.util.*;
  *
  *	@author		Abe White
  */
+@SuppressWarnings("rawtypes")
 abstract class RefValueMap
 	implements RefMap
 {
@@ -78,6 +79,7 @@ abstract class RefValueMap
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public boolean makeHard (Object key)
 	{
 		removeExpired ();
@@ -196,6 +198,7 @@ abstract class RefValueMap
 	}
 
 
+	@SuppressWarnings("unchecked")
 	private Object putFilter (Object key, Object value)
 	{
 		Object replaced;
@@ -330,6 +333,7 @@ abstract class RefValueMap
 		}
 
 
+		@SuppressWarnings("unchecked")
 		public Object setValue (Object value)
 		{
 			Object ret = _entry.getValue ();

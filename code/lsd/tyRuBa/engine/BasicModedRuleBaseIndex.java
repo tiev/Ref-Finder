@@ -38,6 +38,7 @@ import tyRuBa.modes.TypeModeError;
  * A BasicModedRuleBaseIndex stores ModedRuleBaseCollections in a hashmap.
  * The PredicateIdentifier of each ModedRuleBaseCollection is used as the key in the hashmap.
  */
+@SuppressWarnings("rawtypes")
 public class BasicModedRuleBaseIndex extends ModedRuleBaseIndex {
 	
 	QueryEngine engine;
@@ -95,6 +96,7 @@ public class BasicModedRuleBaseIndex extends ModedRuleBaseIndex {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void insert(PredInfo p) throws TypeModeError {
 		typeInfoBase.insert(p);
 		ModedRuleBaseCollection rulebases = new ModedRuleBaseCollection(engine, p, identifier);

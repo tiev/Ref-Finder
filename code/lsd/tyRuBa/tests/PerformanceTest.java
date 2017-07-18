@@ -27,6 +27,7 @@ import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 import tyRuBa.util.ElementSource;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class PerformanceTest {
 
 	private boolean isScenario;
@@ -58,6 +59,7 @@ public class PerformanceTest {
 	/** Creates a performance test from a file of queries (one per line) */	
 	public static PerformanceTest make(FrontEnd frontend, String queryfile) throws ParseException, IOException, TypeModeError {
 		ArrayList queries = new ArrayList();
+		@SuppressWarnings("resource")
 		BufferedReader qf = new BufferedReader(new FileReader(queryfile));
 		String query;
 		boolean isScenario = false;
